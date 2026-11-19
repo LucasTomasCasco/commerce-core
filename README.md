@@ -20,9 +20,9 @@ pnpm dev:web      # Web en :5173
 
 ## Scripts
 
-| Script | Qué hace |
-|---|---|
-| `pnpm lint` | ESLint con reglas estrictas de TypeScript |
-| `pnpm format:check` | Verifica formato con Prettier |
-| `pnpm typecheck` | Verifica tipos en todos los paquetes |
-| `pnpm test` | Tests de todos los paquetes |
+| Script              | Qué hace                                  |
+| ------------------- | ----------------------------------------- |
+| `pnpm lint`         | ESLint con reglas estrictas de TypeScript |
+| `pnpm format:check` | Verifica formato con Prettier             |
+| `pnpm typecheck`    | Verifica tipos en todos los paquetes      |
+| `pnpm test`         | Tests de todos los paquetes               |
