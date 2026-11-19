@@ -1,0 +1,29 @@
+{
+  "name": "commerce-core",
+  "private": true,
+  "description": "Backend y panel multi-tienda para comercios pequeños",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@11.22.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev:api": "pnpm --filter @commerce-core/api dev",
+    "dev:web": "pnpm --filter @commerce-core/web dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "pnpm -r test",
+    "db:up": "docker compose up -d postgres mailpit",
+    "db:down": "docker compose down"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "typescript-eslint": "^8.73.0"
+  }
+}
