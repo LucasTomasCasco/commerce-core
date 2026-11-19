@@ -22,19 +22,22 @@ export type AuthServiceDeps = {
 
 const RESET_TTL_MINUTES = 60;
 
+export async function createSession(
+  db: Db,
+  input: { userId: string; ttlDays: number },
+): Promise<string> {
+  const token = generateToken();
+  await db.insert(sessions).values({
+    userId: input.userId,
+    tokenHash: hashToken(token),
+    expiresAt: new Date(Date.now() + input.ttlDays * 24 * 60 * 60 * 1000),
+  });
+  return token;
+}
+
 export function createAuthService({ db, mailer, sessionTtlDays, appOrigin }: AuthServiceDeps) {
   // Hash de referencia: se verifica aunque el email no exista, para no revelar cuentas por tiempo de respuesta.
   const referenceHash = hashPassword(generateToken());
-
-  async function createSession(userId: string): Promise<string> {
-    const token = generateToken();
-    await db.insert(sessions).values({
-      userId,
-      tokenHash: hashToken(token),
-      expiresAt: new Date(Date.now() + sessionTtlDays * 24 * 60 * 60 * 1000),
-    });
-    return token;
-  }
 
   async function login(email: string, password: string) {
     const [user] = await db
@@ -48,7 +51,7 @@ export function createAuthService({ db, mailer, sessionTtlDays, appOrigin }: Aut
       throw new AppError(401, "INVALID_CREDENTIALS", "Email o contraseña incorrectos");
     }
 
-    const token = await createSession(user.id);
+    const token = await createSession(db, { userId: user.id, ttlDays: sessionTtlDays });
     return { user: toAuthUser(user), token };
   }
 
@@ -131,7 +134,7 @@ export function createAuthService({ db, mailer, sessionTtlDays, appOrigin }: Aut
 
 export type AuthService = ReturnType<typeof createAuthService>;
 
-function toAuthUser(user: typeof users.$inferSelect): AuthUser {
+export function toAuthUser(user: typeof users.$inferSelect): AuthUser {
   return {
     id: user.id,
     email: user.email,

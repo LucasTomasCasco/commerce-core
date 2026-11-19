@@ -1,7 +1,11 @@
 import type { FastifyPluginCallbackZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { AppError } from "../http/errors.js";
-import { requireSession, SESSION_COOKIE, sessionCookieOptions } from "../http/session.js";
+import {
+  currentAuth,
+  requireSession,
+  SESSION_COOKIE,
+  sessionCookieOptions,
+} from "../http/session.js";
 import type { Env } from "../config/env.js";
 
 const PASSWORD_MIN_LENGTH = 10;
@@ -31,7 +35,10 @@ export function authRoutes(env: Env): FastifyPluginCallbackZod {
         },
       },
       async (request, reply) => {
-        const { user, token } = await app.auth.login(request.body.email, request.body.password);
+        const { user, token } = await app.services.auth.login(
+          request.body.email,
+          request.body.password,
+        );
         reply.setCookie(SESSION_COOKIE, token, sessionCookieOptions(env));
         return { user };
       },
@@ -40,11 +47,11 @@ export function authRoutes(env: Env): FastifyPluginCallbackZod {
     app.post(
       "/logout",
       {
-        preHandler: requireSession(app.auth),
+        preHandler: requireSession(app.services.auth),
         schema: { tags: ["auth"], summary: "Cerrar sesión", response: { 204: z.null() } },
       },
       async (request, reply) => {
-        await app.auth.logout(request.auth?.token ?? "");
+        await app.services.auth.logout(currentAuth(request).token);
         reply.clearCookie(SESSION_COOKIE, { path: "/" });
         return reply.code(204).send(null);
       },
@@ -53,17 +60,14 @@ export function authRoutes(env: Env): FastifyPluginCallbackZod {
     app.get(
       "/me",
       {
-        preHandler: requireSession(app.auth),
+        preHandler: requireSession(app.services.auth),
         schema: {
           tags: ["auth"],
           summary: "Usuario de la sesión actual",
           response: { 200: z.object({ user: userSchema }) },
         },
       },
-      (request) => {
-        if (!request.auth) throw new AppError(401, "UNAUTHENTICATED", "Necesitas iniciar sesión");
-        return { user: request.auth.user };
-      },
+      (request) => ({ user: currentAuth(request).user }),
     );
 
     app.post(
@@ -78,7 +82,7 @@ export function authRoutes(env: Env): FastifyPluginCallbackZod {
         },
       },
       async (request, reply) => {
-        await app.auth.requestPasswordReset(request.body.email);
+        await app.services.auth.requestPasswordReset(request.body.email);
         return reply.code(202).send(null);
       },
     );
@@ -95,7 +99,7 @@ export function authRoutes(env: Env): FastifyPluginCallbackZod {
         },
       },
       async (request, reply) => {
-        await app.auth.resetPassword(request.body.token, request.body.password);
+        await app.services.auth.resetPassword(request.body.token, request.body.password);
         return reply.code(204).send(null);
       },
     );

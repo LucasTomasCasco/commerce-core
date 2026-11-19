@@ -7,7 +7,6 @@ import {
   validatorCompiler,
   type ZodTypeProvider,
 } from "fastify-type-provider-zod";
-import { createAuthService } from "./auth/auth-service.js";
 import type { Mailer } from "./auth/mailer.js";
 import type { Env } from "./config/env.js";
 import type { Db } from "./db/client.js";
@@ -15,6 +14,10 @@ import { registerErrorHandler } from "./http/error-handler.js";
 import { authRoutes } from "./routes/auth.js";
 import { healthRoutes } from "./routes/health.js";
 import { storesRoutes } from "./routes/stores.js";
+import { teamRoutes } from "./routes/team.js";
+import { platformRoutes } from "./routes/platform.js";
+import { invitationRoutes } from "./routes/invitations.js";
+import { createServices } from "./services.js";
 
 export type AppDeps = {
   env: Env;
@@ -39,22 +42,17 @@ export async function buildApp({ env, db, mailer }: AppDeps) {
   await app.register(cookie);
   await app.register(rateLimit, { global: false });
 
-  app.decorate(
-    "auth",
-    createAuthService({
-      db,
-      mailer,
-      sessionTtlDays: env.SESSION_TTL_DAYS,
-      appOrigin: env.APP_ORIGIN,
-    }),
-  );
   app.decorate("db", db);
+  app.decorate("services", createServices({ db, mailer, env }));
   app.decorateRequest("auth", null);
   app.decorateRequest("store", null);
 
   await app.register(healthRoutes, { prefix: "/api/v1" });
   await app.register(authRoutes(env), { prefix: "/api/v1/auth" });
   await app.register(storesRoutes, { prefix: "/api/v1" });
+  await app.register(teamRoutes, { prefix: "/api/v1" });
+  await app.register(platformRoutes, { prefix: "/api/v1" });
+  await app.register(invitationRoutes(env), { prefix: "/api/v1" });
 
   return app;
 }

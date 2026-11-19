@@ -66,10 +66,10 @@ describe("acceso a tiendas", () => {
     await addMember(ctx.db, { storeId: storeA.id, userId: staff.id, roleId: vendedor.id });
     await addMember(ctx.db, { storeId: storeB.id, userId: other.id, roleId: roleB.id });
 
-    ownerToken = (await ctx.app.auth.login("owner@example.com", PASSWORD)).token;
-    vendedorToken = (await ctx.app.auth.login("staff@example.com", PASSWORD)).token;
-    otherStoreToken = (await ctx.app.auth.login("otra@example.com", PASSWORD)).token;
-    platformToken = (await ctx.app.auth.login("admin@example.com", PASSWORD)).token;
+    ownerToken = (await ctx.app.services.auth.login("owner@example.com", PASSWORD)).token;
+    vendedorToken = (await ctx.app.services.auth.login("staff@example.com", PASSWORD)).token;
+    otherStoreToken = (await ctx.app.services.auth.login("otra@example.com", PASSWORD)).token;
+    platformToken = (await ctx.app.services.auth.login("admin@example.com", PASSWORD)).token;
   });
 
   afterEach(async () => {

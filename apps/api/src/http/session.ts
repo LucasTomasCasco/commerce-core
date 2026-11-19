@@ -23,11 +23,31 @@ export function sessionCookieOptions(env: Env) {
 // Valida la cookie de sesión y deja el contexto en request.auth. Sin sesión válida responde 401.
 export function requireSession(auth: AuthService): preHandlerAsyncHookHandler {
   return async (request: FastifyRequest, _reply: FastifyReply) => {
-    const token = request.cookies[SESSION_COOKIE];
-    const user = token ? await auth.getUserByToken(token) : null;
-    if (!token || !user) {
+    await loadSession(auth, request);
+    if (!request.auth) {
       throw new AppError(401, "UNAUTHENTICATED", "Necesitas iniciar sesión");
     }
-    request.auth = { user, token };
   };
+}
+
+// Para rutas públicas que cambian según haya sesión: deja request.auth en null si no hay sesión válida.
+export function optionalSession(auth: AuthService): preHandlerAsyncHookHandler {
+  return async (request: FastifyRequest, _reply: FastifyReply) => {
+    await loadSession(auth, request);
+  };
+}
+
+async function loadSession(auth: AuthService, request: FastifyRequest): Promise<void> {
+  const token = request.cookies[SESSION_COOKIE];
+  if (!token) return;
+  const user = await auth.getUserByToken(token);
+  if (user) request.auth = { user, token };
+}
+
+// Para rutas protegidas por requireSession: devuelve el contexto de autenticación sin fallbacks.
+export function currentAuth(request: FastifyRequest): AuthContext {
+  if (!request.auth) {
+    throw new AppError(401, "UNAUTHENTICATED", "Necesitas iniciar sesión");
+  }
+  return request.auth;
 }

@@ -4,9 +4,8 @@ import { z } from "zod";
 import { PERMISSIONS } from "../domain/permissions.js";
 import { withDbContext } from "../db/tenant.js";
 import { storeMembers, storeRoles, stores } from "../db/schema/index.js";
-import { AppError } from "../http/errors.js";
 import { requireStoreAccess } from "../http/guards.js";
-import { requireSession } from "../http/session.js";
+import { currentAuth, requireSession } from "../http/session.js";
 
 const storeSchema = z.object({
   id: z.uuid(),
@@ -22,18 +21,11 @@ const accessSchema = z.object({
   permissions: z.array(z.enum(PERMISSIONS)),
 });
 
-const roleSchema = z.object({
-  id: z.uuid(),
-  name: z.string(),
-  permissions: z.array(z.enum(PERMISSIONS)),
-  isSystem: z.boolean(),
-});
-
 export const storesRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.get(
     "/me/stores",
     {
-      preHandler: requireSession(app.auth),
+      preHandler: requireSession(app.services.auth),
       schema: {
         tags: ["stores"],
         summary: "Tiendas en las que tengo membresía",
@@ -43,8 +35,7 @@ export const storesRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
       },
     },
     async (request) => {
-      if (!request.auth) throw new AppError(401, "UNAUTHENTICATED", "Necesitas iniciar sesión");
-      const userId = request.auth.user.id;
+      const userId = currentAuth(request).user.id;
 
       const rows = await withDbContext(app.db, { userId }, (tx) =>
         tx
@@ -75,7 +66,7 @@ export const storesRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.get(
     "/stores/:storeId",
     {
-      preHandler: [requireSession(app.auth), requireStoreAccess(app.db)],
+      preHandler: [requireSession(app.services.auth), requireStoreAccess(app.db)],
       schema: {
         tags: ["stores"],
         summary: "Detalle de la tienda y mi acceso",
@@ -84,43 +75,9 @@ export const storesRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
       },
     },
     (request) => {
-      if (!request.store) throw new AppError(404, "STORE_NOT_FOUND", "Tienda no encontrada");
+      if (!request.store) throw new Error("requireStoreAccess no resolvió la tienda");
       const { store, ...access } = request.store;
       return { store, access };
-    },
-  );
-
-  app.get(
-    "/stores/:storeId/roles",
-    {
-      preHandler: [requireSession(app.auth), requireStoreAccess(app.db, "team:manage")],
-      schema: {
-        tags: ["team"],
-        summary: "Roles de la tienda",
-        params: z.object({ storeId: z.uuid() }),
-        response: { 200: z.object({ roles: z.array(roleSchema) }) },
-      },
-    },
-    async (request) => {
-      if (!request.store) throw new AppError(404, "STORE_NOT_FOUND", "Tienda no encontrada");
-      const storeId = request.store.store.id;
-
-      const roles = await withDbContext(app.db, { storeId }, (tx) =>
-        tx
-          .select()
-          .from(storeRoles)
-          .where(eq(storeRoles.storeId, storeId))
-          .orderBy(storeRoles.name),
-      );
-
-      return {
-        roles: roles.map((role) => ({
-          id: role.id,
-          name: role.name,
-          permissions: role.permissions as (typeof PERMISSIONS)[number][],
-          isSystem: role.isSystem,
-        })),
-      };
     },
   );
 
