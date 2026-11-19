@@ -1,30 +1,26 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { FastifyInstance } from "fastify";
-import { buildApp } from "./app.js";
-import { loadEnv } from "./config/env.js";
+import { buildTestApp } from "./support/app.js";
 
 describe("app", () => {
-  let app: FastifyInstance;
+  let ctx: Awaited<ReturnType<typeof buildTestApp>>;
 
   beforeEach(async () => {
-    app = await buildApp({
-      env: loadEnv({ DATABASE_URL: "postgres://unused", LOG_LEVEL: "silent" }),
-    });
+    ctx = await buildTestApp();
   });
 
   afterEach(async () => {
-    await app.close();
+    await ctx.close();
   });
 
   it("responde ok en /api/v1/health", async () => {
-    const res = await app.inject({ method: "GET", url: "/api/v1/health" });
+    const res = await ctx.app.inject({ method: "GET", url: "/api/v1/health" });
 
     expect(res.statusCode).toBe(200);
     expect(res.json()).toEqual({ status: "ok" });
   });
 
   it("responde problem+json en rutas inexistentes", async () => {
-    const res = await app.inject({ method: "GET", url: "/no-existe" });
+    const res = await ctx.app.inject({ method: "GET", url: "/no-existe" });
 
     expect(res.statusCode).toBe(404);
     expect(res.headers["content-type"]).toContain("application/problem+json");

@@ -9,6 +9,7 @@ const envSchema = z.object({
   SMTP_URL: z.string().default("smtp://localhost:1025"),
   MAIL_FROM: z.string().default("Commerce Core <no-reply@commerce-core.local>"),
   SESSION_TTL_DAYS: z.coerce.number().int().positive().default(7),
+  AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10),
 });
 
 export type Env = z.infer<typeof envSchema>;

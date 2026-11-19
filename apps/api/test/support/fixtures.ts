@@ -1,3 +1,4 @@
+import { hashPassword } from "../../src/auth/password.js";
 import {
   categories,
   currencies,
@@ -104,4 +105,13 @@ export async function createOrder(
     .returning();
   if (!order) throw new Error("No se creó el pedido de prueba");
   return order;
+}
+
+export async function createLoginUser(db: Db, email: string, password: string) {
+  const [user] = await db
+    .insert(users)
+    .values({ email, fullName: email, passwordHash: await hashPassword(password) })
+    .returning();
+  if (!user) throw new Error("No se creó el usuario de prueba");
+  return user;
 }
