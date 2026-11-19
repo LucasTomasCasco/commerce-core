@@ -81,5 +81,25 @@ export const storesRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
     },
   );
 
+  app.patch(
+    "/stores/:storeId",
+    {
+      preHandler: [requireSession(app.services.auth), requireStoreAccess(app.db, "store:settings")],
+      schema: {
+        tags: ["stores"],
+        summary: "Editar los datos de la tienda",
+        params: z.object({ storeId: z.uuid() }),
+        body: z.object({ name: z.string().trim().min(1).max(120) }),
+        response: { 200: storeSchema },
+      },
+    },
+    (request) =>
+      app.services.platform.updateStore({
+        actorUserId: currentAuth(request).user.id,
+        storeId: request.params.storeId,
+        name: request.body.name,
+      }),
+  );
+
   done();
 };

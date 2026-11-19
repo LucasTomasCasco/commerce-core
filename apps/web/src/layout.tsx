@@ -24,9 +24,14 @@ export function AppLayout() {
           </Link>
           <div className="flex items-center gap-3 text-sm">
             {me.data?.isPlatformAdmin && (
-              <Link to="/admin/tiendas" className="text-slate-600 hover:text-slate-900">
-                Administración
-              </Link>
+              <>
+                <Link to="/admin/tiendas" className="text-slate-600 hover:text-slate-900">
+                  Tiendas
+                </Link>
+                <Link to="/admin/monedas" className="text-slate-600 hover:text-slate-900">
+                  Monedas
+                </Link>
+              </>
             )}
             <span className="hidden text-slate-500 sm:inline">{me.data?.fullName}</span>
             <Button variant="secondary" onClick={() => void logout()}>

@@ -19,6 +19,13 @@ describe("app", () => {
     expect(res.json()).toEqual({ status: "ok" });
   });
 
+  it("/api/v1/ready verifica la conexión a la base", async () => {
+    const res = await ctx.app.inject({ method: "GET", url: "/api/v1/ready" });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({ status: "ready" });
+  });
+
   it("responde problem+json en rutas inexistentes", async () => {
     const res = await ctx.app.inject({ method: "GET", url: "/no-existe" });
 

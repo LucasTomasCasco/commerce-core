@@ -43,6 +43,45 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/ready": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Servicio listo para recibir tráfico */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": {
+              /** @enum {string} */
+              status: "ready";
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/auth/login": {
     parameters: {
       query?: never;
@@ -390,7 +429,43 @@ export interface paths {
     delete?: never;
     options?: never;
     head?: never;
-    patch?: never;
+    /** Editar los datos de la tienda */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          storeId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            name: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": {
+              /** Format: uuid */
+              id: string;
+              slug: string;
+              name: string;
+              /** @enum {string} */
+              status: "draft" | "active" | "suspended";
+              currencyCode: string;
+            };
+          };
+        };
+      };
+    };
     trace?: never;
   };
   "/api/v1/stores/{storeId}/members": {

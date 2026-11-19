@@ -128,6 +128,16 @@ export function createPlatformService({ db, invitations }: PlatformServiceDeps) 
         .where(eq(stores.id, input.storeId))
         .returning();
       if (!updated) throw new Error("No se actualizó la tienda");
+      if (input.name !== undefined) {
+        await recordAudit(tx, {
+          storeId: input.storeId,
+          actorUserId: input.actorUserId,
+          action: "store.renamed",
+          entity: "store",
+          entityId: input.storeId,
+          metadata: { name: input.name },
+        });
+      }
       if (input.status !== undefined) {
         await recordAudit(tx, {
           storeId: input.storeId,
