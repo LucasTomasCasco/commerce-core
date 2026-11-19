@@ -1,3 +1,13 @@
+# Stack local completo: base, correo de prueba, migraciones, seed, API y web.
+#   docker compose up -d --build
+#   web: http://localhost:${WEB_PORT:-8090} · API: la misma URL en /api/v1 · Mailpit: http://localhost:8025
+# Definición compartida: migrate, seed y api usan la misma imagen.
+x-api-image: &api-image
+  image: commerce-core/api:local
+  build:
+    context: .
+    dockerfile: apps/api/Dockerfile
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -20,6 +30,49 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
+
+  api-migrate:
+    <<: *api-image
+    command: ["node", "dist/db/migrate-cli.js"]
+    environment:
+      DATABASE_URL: postgres://commerce:commerce@postgres:5432/commerce_core
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api-seed:
+    <<: *api-image
+    command: ["node", "dist/db/seed-cli.js"]
+    environment:
+      DATABASE_URL: postgres://commerce:commerce@postgres:5432/commerce_core
+      PLATFORM_ADMIN_EMAIL: ${PLATFORM_ADMIN_EMAIL:-admin@commerce-core.local}
+      PLATFORM_ADMIN_PASSWORD: ${PLATFORM_ADMIN_PASSWORD:?Definir PLATFORM_ADMIN_PASSWORD en .env}
+    depends_on:
+      api-migrate:
+        condition: service_completed_successfully
+
+  api:
+    <<: *api-image
+    environment:
+      PORT: 3000
+      LOG_LEVEL: info
+      DATABASE_URL: postgres://commerce:commerce@postgres:5432/commerce_core
+      APP_ORIGIN: http://localhost:${WEB_PORT:-8090}
+      SMTP_URL: smtp://mailpit:1025
+    depends_on:
+      api-seed:
+        condition: service_completed_successfully
+      mailpit:
+        condition: service_started
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "${WEB_PORT:-8090}:80"
+    depends_on:
+      - api
 
 volumes:
   pgdata:

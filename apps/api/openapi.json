@@ -11,7 +11,9 @@
     "/api/v1/health": {
       "get": {
         "summary": "Estado del servicio",
-        "tags": ["system"],
+        "tags": [
+          "system"
+        ],
         "responses": {
           "200": {
             "description": "Default Response",
@@ -22,10 +24,14 @@
                   "properties": {
                     "status": {
                       "type": "string",
-                      "enum": ["ok"]
+                      "enum": [
+                        "ok"
+                      ]
                     }
                   },
-                  "required": ["status"],
+                  "required": [
+                    "status"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -37,7 +43,9 @@
     "/api/v1/auth/login": {
       "post": {
         "summary": "Iniciar sesión",
-        "tags": ["auth"],
+        "tags": [
+          "auth"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -55,7 +63,10 @@
                     "minLength": 1
                   }
                 },
-                "required": ["email", "password"]
+                "required": [
+                  "email",
+                  "password"
+                ]
               }
             }
           }
@@ -88,11 +99,18 @@
                           "type": "boolean"
                         }
                       },
-                      "required": ["id", "email", "fullName", "isPlatformAdmin"],
+                      "required": [
+                        "id",
+                        "email",
+                        "fullName",
+                        "isPlatformAdmin"
+                      ],
                       "additionalProperties": false
                     }
                   },
-                  "required": ["user"],
+                  "required": [
+                    "user"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -104,7 +122,9 @@
     "/api/v1/auth/logout": {
       "post": {
         "summary": "Cerrar sesión",
-        "tags": ["auth"],
+        "tags": [
+          "auth"
+        ],
         "responses": {
           "204": {
             "description": "Default Response",
@@ -113,7 +133,9 @@
                 "schema": {
                   "type": "string",
                   "nullable": true,
-                  "enum": [null]
+                  "enum": [
+                    null
+                  ]
                 }
               }
             }
@@ -124,7 +146,9 @@
     "/api/v1/auth/me": {
       "get": {
         "summary": "Usuario de la sesión actual",
-        "tags": ["auth"],
+        "tags": [
+          "auth"
+        ],
         "responses": {
           "200": {
             "description": "Default Response",
@@ -153,11 +177,18 @@
                           "type": "boolean"
                         }
                       },
-                      "required": ["id", "email", "fullName", "isPlatformAdmin"],
+                      "required": [
+                        "id",
+                        "email",
+                        "fullName",
+                        "isPlatformAdmin"
+                      ],
                       "additionalProperties": false
                     }
                   },
-                  "required": ["user"],
+                  "required": [
+                    "user"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -169,7 +200,9 @@
     "/api/v1/auth/forgot-password": {
       "post": {
         "summary": "Pedir enlace para restablecer la contraseña",
-        "tags": ["auth"],
+        "tags": [
+          "auth"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -183,7 +216,9 @@
                     "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
                   }
                 },
-                "required": ["email"]
+                "required": [
+                  "email"
+                ]
               }
             }
           }
@@ -196,7 +231,9 @@
                 "schema": {
                   "type": "string",
                   "nullable": true,
-                  "enum": [null]
+                  "enum": [
+                    null
+                  ]
                 }
               }
             }
@@ -207,7 +244,9 @@
     "/api/v1/auth/reset-password": {
       "post": {
         "summary": "Elegir una nueva contraseña con el enlace recibido",
-        "tags": ["auth"],
+        "tags": [
+          "auth"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -225,7 +264,10 @@
                     "maxLength": 200
                   }
                 },
-                "required": ["token", "password"]
+                "required": [
+                  "token",
+                  "password"
+                ]
               }
             }
           }
@@ -238,7 +280,9 @@
                 "schema": {
                   "type": "string",
                   "nullable": true,
-                  "enum": [null]
+                  "enum": [
+                    null
+                  ]
                 }
               }
             }
@@ -249,7 +293,9 @@
     "/api/v1/me/stores": {
       "get": {
         "summary": "Tiendas en las que tengo membresía",
-        "tags": ["stores"],
+        "tags": [
+          "stores"
+        ],
         "responses": {
           "200": {
             "description": "Default Response",
@@ -276,7 +322,11 @@
                           },
                           "status": {
                             "type": "string",
-                            "enum": ["draft", "active", "suspended"]
+                            "enum": [
+                              "draft",
+                              "active",
+                              "suspended"
+                            ]
                           },
                           "currencyCode": {
                             "type": "string",
@@ -313,16 +363,29 @@
                                 }
                               }
                             },
-                            "required": ["roleName", "isOwner", "permissions"],
+                            "required": [
+                              "roleName",
+                              "isOwner",
+                              "permissions"
+                            ],
                             "additionalProperties": false
                           }
                         },
-                        "required": ["id", "slug", "name", "status", "currencyCode", "access"],
+                        "required": [
+                          "id",
+                          "slug",
+                          "name",
+                          "status",
+                          "currencyCode",
+                          "access"
+                        ],
                         "additionalProperties": false
                       }
                     }
                   },
-                  "required": ["stores"],
+                  "required": [
+                    "stores"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -334,7 +397,9 @@
     "/api/v1/stores/{storeId}": {
       "get": {
         "summary": "Detalle de la tienda y mi acceso",
-        "tags": ["stores"],
+        "tags": [
+          "stores"
+        ],
         "parameters": [
           {
             "schema": {
@@ -371,7 +436,11 @@
                         },
                         "status": {
                           "type": "string",
-                          "enum": ["draft", "active", "suspended"]
+                          "enum": [
+                            "draft",
+                            "active",
+                            "suspended"
+                          ]
                         },
                         "currencyCode": {
                           "type": "string",
@@ -379,7 +448,13 @@
                           "maxLength": 3
                         }
                       },
-                      "required": ["id", "slug", "name", "status", "currencyCode"],
+                      "required": [
+                        "id",
+                        "slug",
+                        "name",
+                        "status",
+                        "currencyCode"
+                      ],
                       "additionalProperties": false
                     },
                     "access": {
@@ -412,11 +487,18 @@
                           }
                         }
                       },
-                      "required": ["roleName", "isOwner", "permissions"],
+                      "required": [
+                        "roleName",
+                        "isOwner",
+                        "permissions"
+                      ],
                       "additionalProperties": false
                     }
                   },
-                  "required": ["store", "access"],
+                  "required": [
+                    "store",
+                    "access"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -428,7 +510,9 @@
     "/api/v1/stores/{storeId}/members": {
       "get": {
         "summary": "Miembros de la tienda",
-        "tags": ["team"],
+        "tags": [
+          "team"
+        ],
         "parameters": [
           {
             "schema": {
@@ -502,7 +586,9 @@
                       }
                     }
                   },
-                  "required": ["members"],
+                  "required": [
+                    "members"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -514,7 +600,9 @@
     "/api/v1/stores/{storeId}/invitations": {
       "post": {
         "summary": "Invitar staff por email con un rol",
-        "tags": ["team"],
+        "tags": [
+          "team"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -533,7 +621,10 @@
                     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                   }
                 },
-                "required": ["email", "roleId"]
+                "required": [
+                  "email",
+                  "roleId"
+                ]
               }
             }
           }
@@ -558,7 +649,9 @@
                 "schema": {
                   "type": "string",
                   "nullable": true,
-                  "enum": [null]
+                  "enum": [
+                    null
+                  ]
                 }
               }
             }
@@ -569,7 +662,9 @@
     "/api/v1/stores/{storeId}/members/{memberId}": {
       "patch": {
         "summary": "Cambiar el rol de un miembro",
-        "tags": ["team"],
+        "tags": [
+          "team"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -583,7 +678,9 @@
                     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                   }
                 },
-                "required": ["roleId"]
+                "required": [
+                  "roleId"
+                ]
               }
             }
           }
@@ -618,7 +715,9 @@
                 "schema": {
                   "type": "string",
                   "nullable": true,
-                  "enum": [null]
+                  "enum": [
+                    null
+                  ]
                 }
               }
             }
@@ -627,7 +726,9 @@
       },
       "delete": {
         "summary": "Quitar un miembro de la tienda",
-        "tags": ["team"],
+        "tags": [
+          "team"
+        ],
         "parameters": [
           {
             "schema": {
@@ -658,7 +759,9 @@
                 "schema": {
                   "type": "string",
                   "nullable": true,
-                  "enum": [null]
+                  "enum": [
+                    null
+                  ]
                 }
               }
             }
@@ -669,7 +772,9 @@
     "/api/v1/stores/{storeId}/roles": {
       "get": {
         "summary": "Roles de la tienda",
-        "tags": ["team"],
+        "tags": [
+          "team"
+        ],
         "parameters": [
           {
             "schema": {
@@ -727,12 +832,19 @@
                             "type": "boolean"
                           }
                         },
-                        "required": ["id", "name", "permissions", "isSystem"],
+                        "required": [
+                          "id",
+                          "name",
+                          "permissions",
+                          "isSystem"
+                        ],
                         "additionalProperties": false
                       }
                     }
                   },
-                  "required": ["roles"],
+                  "required": [
+                    "roles"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -742,7 +854,9 @@
       },
       "post": {
         "summary": "Crear un rol con permisos a medida",
-        "tags": ["team"],
+        "tags": [
+          "team"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -777,7 +891,10 @@
                     }
                   }
                 },
-                "required": ["name", "permissions"]
+                "required": [
+                  "name",
+                  "permissions"
+                ]
               }
             }
           }
@@ -834,7 +951,12 @@
                       "type": "boolean"
                     }
                   },
-                  "required": ["id", "name", "permissions", "isSystem"],
+                  "required": [
+                    "id",
+                    "name",
+                    "permissions",
+                    "isSystem"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -846,7 +968,9 @@
     "/api/v1/stores/{storeId}/roles/{roleId}": {
       "patch": {
         "summary": "Editar un rol",
-        "tags": ["team"],
+        "tags": [
+          "team"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -947,7 +1071,12 @@
                       "type": "boolean"
                     }
                   },
-                  "required": ["id", "name", "permissions", "isSystem"],
+                  "required": [
+                    "id",
+                    "name",
+                    "permissions",
+                    "isSystem"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -957,7 +1086,9 @@
       },
       "delete": {
         "summary": "Eliminar un rol sin miembros asignados",
-        "tags": ["team"],
+        "tags": [
+          "team"
+        ],
         "parameters": [
           {
             "schema": {
@@ -988,7 +1119,9 @@
                 "schema": {
                   "type": "string",
                   "nullable": true,
-                  "enum": [null]
+                  "enum": [
+                    null
+                  ]
                 }
               }
             }
@@ -999,7 +1132,9 @@
     "/api/v1/platform/stores": {
       "get": {
         "summary": "Listar tiendas",
-        "tags": ["platform"],
+        "tags": [
+          "platform"
+        ],
         "parameters": [
           {
             "schema": {
@@ -1050,7 +1185,11 @@
                           },
                           "status": {
                             "type": "string",
-                            "enum": ["draft", "active", "suspended"]
+                            "enum": [
+                              "draft",
+                              "active",
+                              "suspended"
+                            ]
                           },
                           "currencyCode": {
                             "type": "string",
@@ -1094,7 +1233,12 @@
                       "maximum": 9007199254740991
                     }
                   },
-                  "required": ["items", "total", "limit", "offset"],
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "offset"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -1104,7 +1248,9 @@
       },
       "post": {
         "summary": "Crear tienda e invitar a su propietario",
-        "tags": ["platform"],
+        "tags": [
+          "platform"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1134,7 +1280,12 @@
                     "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
                   }
                 },
-                "required": ["name", "slug", "currencyCode", "ownerEmail"]
+                "required": [
+                  "name",
+                  "slug",
+                  "currencyCode",
+                  "ownerEmail"
+                ]
               }
             }
           }
@@ -1160,7 +1311,11 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": ["draft", "active", "suspended"]
+                      "enum": [
+                        "draft",
+                        "active",
+                        "suspended"
+                      ]
                     },
                     "currencyCode": {
                       "type": "string",
@@ -1196,7 +1351,9 @@
     "/api/v1/platform/stores/{storeId}": {
       "get": {
         "summary": "Detalle de una tienda",
-        "tags": ["platform"],
+        "tags": [
+          "platform"
+        ],
         "parameters": [
           {
             "schema": {
@@ -1230,7 +1387,11 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": ["draft", "active", "suspended"]
+                      "enum": [
+                        "draft",
+                        "active",
+                        "suspended"
+                      ]
                     },
                     "currencyCode": {
                       "type": "string",
@@ -1264,7 +1425,9 @@
       },
       "patch": {
         "summary": "Editar tienda o cambiar su estado",
-        "tags": ["platform"],
+        "tags": [
+          "platform"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1279,7 +1442,10 @@
                   },
                   "status": {
                     "type": "string",
-                    "enum": ["active", "suspended"]
+                    "enum": [
+                      "active",
+                      "suspended"
+                    ]
                   }
                 }
               }
@@ -1319,7 +1485,11 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": ["draft", "active", "suspended"]
+                      "enum": [
+                        "draft",
+                        "active",
+                        "suspended"
+                      ]
                     },
                     "currencyCode": {
                       "type": "string",
@@ -1355,7 +1525,9 @@
     "/api/v1/platform/currencies": {
       "get": {
         "summary": "Monedas disponibles",
-        "tags": ["platform"],
+        "tags": [
+          "platform"
+        ],
         "responses": {
           "200": {
             "description": "Default Response",
@@ -1386,12 +1558,19 @@
                             "type": "boolean"
                           }
                         },
-                        "required": ["code", "name", "minorUnit", "isActive"],
+                        "required": [
+                          "code",
+                          "name",
+                          "minorUnit",
+                          "isActive"
+                        ],
                         "additionalProperties": false
                       }
                     }
                   },
-                  "required": ["currencies"],
+                  "required": [
+                    "currencies"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -1401,7 +1580,9 @@
       },
       "post": {
         "summary": "Agregar una moneda",
-        "tags": ["platform"],
+        "tags": [
+          "platform"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1424,7 +1605,11 @@
                     "maximum": 4
                   }
                 },
-                "required": ["code", "name", "minorUnit"]
+                "required": [
+                  "code",
+                  "name",
+                  "minorUnit"
+                ]
               }
             }
           }
@@ -1454,7 +1639,12 @@
                       "type": "boolean"
                     }
                   },
-                  "required": ["code", "name", "minorUnit", "isActive"],
+                  "required": [
+                    "code",
+                    "name",
+                    "minorUnit",
+                    "isActive"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -1466,7 +1656,9 @@
     "/api/v1/platform/currencies/{code}": {
       "patch": {
         "summary": "Editar o desactivar una moneda",
-        "tags": ["platform"],
+        "tags": [
+          "platform"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1523,7 +1715,12 @@
                       "type": "boolean"
                     }
                   },
-                  "required": ["code", "name", "minorUnit", "isActive"],
+                  "required": [
+                    "code",
+                    "name",
+                    "minorUnit",
+                    "isActive"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -1535,7 +1732,9 @@
     "/api/v1/invitations/{token}": {
       "get": {
         "summary": "Datos de una invitación pendiente",
-        "tags": ["team"],
+        "tags": [
+          "team"
+        ],
         "parameters": [
           {
             "schema": {
@@ -1570,7 +1769,12 @@
                       "type": "boolean"
                     }
                   },
-                  "required": ["email", "storeName", "roleName", "accountExists"],
+                  "required": [
+                    "email",
+                    "storeName",
+                    "roleName",
+                    "accountExists"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -1582,7 +1786,9 @@
     "/api/v1/invitations/{token}/accept": {
       "post": {
         "summary": "Aceptar una invitación",
-        "tags": ["team"],
+        "tags": [
+          "team"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1630,7 +1836,9 @@
                       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                     }
                   },
-                  "required": ["storeId"],
+                  "required": [
+                    "storeId"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -1642,7 +1850,9 @@
     "/api/v1/stores/{storeId}/categories": {
       "get": {
         "summary": "Categorías de la tienda",
-        "tags": ["catalog"],
+        "tags": [
+          "catalog"
+        ],
         "parameters": [
           {
             "schema": {
@@ -1719,7 +1929,9 @@
                       }
                     }
                   },
-                  "required": ["categories"],
+                  "required": [
+                    "categories"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -1729,7 +1941,9 @@
       },
       "post": {
         "summary": "Crear categoría",
-        "tags": ["catalog"],
+        "tags": [
+          "catalog"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1749,7 +1963,10 @@
                     "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
                   }
                 },
-                "required": ["name", "slug"]
+                "required": [
+                  "name",
+                  "slug"
+                ]
               }
             }
           }
@@ -1824,7 +2041,9 @@
     "/api/v1/stores/{storeId}/categories/{categoryId}": {
       "patch": {
         "summary": "Editar categoría",
-        "tags": ["catalog"],
+        "tags": [
+          "catalog"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1926,7 +2145,9 @@
       },
       "delete": {
         "summary": "Archivar categoría",
-        "tags": ["catalog"],
+        "tags": [
+          "catalog"
+        ],
         "parameters": [
           {
             "schema": {
@@ -1957,7 +2178,9 @@
                 "schema": {
                   "type": "string",
                   "nullable": true,
-                  "enum": [null]
+                  "enum": [
+                    null
+                  ]
                 }
               }
             }
@@ -1968,7 +2191,9 @@
     "/api/v1/stores/{storeId}/products": {
       "get": {
         "summary": "Productos de la tienda con filtros",
-        "tags": ["catalog"],
+        "tags": [
+          "catalog"
+        ],
         "parameters": [
           {
             "schema": {
@@ -2138,7 +2363,12 @@
                       "maximum": 9007199254740991
                     }
                   },
-                  "required": ["items", "total", "limit", "offset"],
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "offset"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -2148,7 +2378,9 @@
       },
       "post": {
         "summary": "Crear producto",
-        "tags": ["catalog"],
+        "tags": [
+          "catalog"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -2181,7 +2413,11 @@
                     "maximum": 9007199254740991
                   }
                 },
-                "required": ["sku", "name", "priceMinor"]
+                "required": [
+                  "sku",
+                  "name",
+                  "priceMinor"
+                ]
               }
             }
           }
@@ -2284,7 +2520,9 @@
     "/api/v1/stores/{storeId}/products/{productId}": {
       "get": {
         "summary": "Detalle de producto",
-        "tags": ["catalog"],
+        "tags": [
+          "catalog"
+        ],
         "parameters": [
           {
             "schema": {
@@ -2391,7 +2629,9 @@
       },
       "patch": {
         "summary": "Editar producto",
-        "tags": ["catalog"],
+        "tags": [
+          "catalog"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -2539,7 +2779,9 @@
       },
       "delete": {
         "summary": "Archivar producto",
-        "tags": ["catalog"],
+        "tags": [
+          "catalog"
+        ],
         "parameters": [
           {
             "schema": {
@@ -2570,7 +2812,9 @@
                 "schema": {
                   "type": "string",
                   "nullable": true,
-                  "enum": [null]
+                  "enum": [
+                    null
+                  ]
                 }
               }
             }
@@ -2581,7 +2825,9 @@
     "/api/v1/public/stores/{slug}/categories": {
       "get": {
         "summary": "Categorías visibles de una tienda",
-        "tags": ["public"],
+        "tags": [
+          "public"
+        ],
         "parameters": [
           {
             "schema": {
@@ -2619,12 +2865,18 @@
                             "type": "string"
                           }
                         },
-                        "required": ["id", "name", "slug"],
+                        "required": [
+                          "id",
+                          "name",
+                          "slug"
+                        ],
                         "additionalProperties": false
                       }
                     }
                   },
-                  "required": ["categories"],
+                  "required": [
+                    "categories"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -2636,7 +2888,9 @@
     "/api/v1/public/stores/{slug}/products": {
       "get": {
         "summary": "Productos visibles de una tienda",
-        "tags": ["public"],
+        "tags": [
+          "public"
+        ],
         "parameters": [
           {
             "schema": {
@@ -2768,7 +3022,12 @@
                       "maximum": 9007199254740991
                     }
                   },
-                  "required": ["items", "total", "limit", "offset"],
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "offset"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -2780,7 +3039,9 @@
     "/api/v1/public/stores/{slug}/products/{productId}": {
       "get": {
         "summary": "Detalle de un producto visible",
-        "tags": ["public"],
+        "tags": [
+          "public"
+        ],
         "parameters": [
           {
             "schema": {
@@ -2867,7 +3128,9 @@
     "/api/v1/stores/{storeId}/stock-movements": {
       "get": {
         "summary": "Movimientos de stock",
-        "tags": ["inventory"],
+        "tags": [
+          "inventory"
+        ],
         "parameters": [
           {
             "schema": {
@@ -2942,7 +3205,12 @@
                           },
                           "type": {
                             "type": "string",
-                            "enum": ["purchase", "sale", "sale_cancel", "adjustment"]
+                            "enum": [
+                              "purchase",
+                              "sale",
+                              "sale_cancel",
+                              "adjustment"
+                            ]
                           },
                           "quantityDelta": {
                             "type": "integer",
@@ -2999,7 +3267,12 @@
                       "maximum": 9007199254740991
                     }
                   },
-                  "required": ["items", "total", "limit", "offset"],
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "offset"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3009,7 +3282,9 @@
       },
       "post": {
         "summary": "Registrar entrada o ajuste de stock",
-        "tags": ["inventory"],
+        "tags": [
+          "inventory"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -3024,7 +3299,10 @@
                   },
                   "type": {
                     "type": "string",
-                    "enum": ["purchase", "adjustment"]
+                    "enum": [
+                      "purchase",
+                      "adjustment"
+                    ]
                   },
                   "quantityDelta": {
                     "type": "integer",
@@ -3037,7 +3315,11 @@
                     "maxLength": 200
                   }
                 },
-                "required": ["productId", "type", "quantityDelta"]
+                "required": [
+                  "productId",
+                  "type",
+                  "quantityDelta"
+                ]
               }
             }
           }
@@ -3082,7 +3364,12 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": ["purchase", "sale", "sale_cancel", "adjustment"]
+                          "enum": [
+                            "purchase",
+                            "sale",
+                            "sale_cancel",
+                            "adjustment"
+                          ]
                         },
                         "quantityDelta": {
                           "type": "integer",
@@ -3128,7 +3415,10 @@
                       "maximum": 9007199254740991
                     }
                   },
-                  "required": ["movement", "stockOnHand"],
+                  "required": [
+                    "movement",
+                    "stockOnHand"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3140,7 +3430,9 @@
     "/api/v1/stores/{storeId}/orders": {
       "get": {
         "summary": "Pedidos de la tienda",
-        "tags": ["orders"],
+        "tags": [
+          "orders"
+        ],
         "parameters": [
           {
             "schema": {
@@ -3167,7 +3459,12 @@
           {
             "schema": {
               "type": "string",
-              "enum": ["pending", "confirmed", "fulfilled", "cancelled"]
+              "enum": [
+                "pending",
+                "confirmed",
+                "fulfilled",
+                "cancelled"
+              ]
             },
             "in": "query",
             "name": "status",
@@ -3212,7 +3509,12 @@
                           },
                           "status": {
                             "type": "string",
-                            "enum": ["pending", "confirmed", "fulfilled", "cancelled"]
+                            "enum": [
+                              "pending",
+                              "confirmed",
+                              "fulfilled",
+                              "cancelled"
+                            ]
                           },
                           "customerName": {
                             "type": "string"
@@ -3281,7 +3583,12 @@
                       "maximum": 9007199254740991
                     }
                   },
-                  "required": ["items", "total", "limit", "offset"],
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "offset"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3291,7 +3598,9 @@
       },
       "post": {
         "summary": "Cargar un pedido manual",
-        "tags": ["orders"],
+        "tags": [
+          "orders"
+        ],
         "description": "Enviar Idempotency-Key evita crear dos pedidos ante un reintento.",
         "requestBody": {
           "required": true,
@@ -3333,11 +3642,18 @@
                           "maximum": 9007199254740991
                         }
                       },
-                      "required": ["productId", "quantity"]
+                      "required": [
+                        "productId",
+                        "quantity"
+                      ]
                     }
                   }
                 },
-                "required": ["customerName", "customerPhone", "items"]
+                "required": [
+                  "customerName",
+                  "customerPhone",
+                  "items"
+                ]
               }
             }
           }
@@ -3387,7 +3703,12 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": ["pending", "confirmed", "fulfilled", "cancelled"]
+                      "enum": [
+                        "pending",
+                        "confirmed",
+                        "fulfilled",
+                        "cancelled"
+                      ]
                     },
                     "customerName": {
                       "type": "string"
@@ -3499,7 +3820,9 @@
     "/api/v1/stores/{storeId}/orders/{orderId}": {
       "get": {
         "summary": "Detalle de pedido",
-        "tags": ["orders"],
+        "tags": [
+          "orders"
+        ],
         "parameters": [
           {
             "schema": {
@@ -3545,7 +3868,12 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": ["pending", "confirmed", "fulfilled", "cancelled"]
+                      "enum": [
+                        "pending",
+                        "confirmed",
+                        "fulfilled",
+                        "cancelled"
+                      ]
                     },
                     "customerName": {
                       "type": "string"
@@ -3657,7 +3985,9 @@
     "/api/v1/stores/{storeId}/orders/{orderId}/confirm": {
       "post": {
         "summary": "Confirmar pedido pendiente",
-        "tags": ["orders"],
+        "tags": [
+          "orders"
+        ],
         "parameters": [
           {
             "schema": {
@@ -3703,7 +4033,12 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": ["pending", "confirmed", "fulfilled", "cancelled"]
+                      "enum": [
+                        "pending",
+                        "confirmed",
+                        "fulfilled",
+                        "cancelled"
+                      ]
                     },
                     "customerName": {
                       "type": "string"
@@ -3815,7 +4150,9 @@
     "/api/v1/stores/{storeId}/orders/{orderId}/fulfill": {
       "post": {
         "summary": "Marcar pedido confirmado como entregado",
-        "tags": ["orders"],
+        "tags": [
+          "orders"
+        ],
         "parameters": [
           {
             "schema": {
@@ -3861,7 +4198,12 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": ["pending", "confirmed", "fulfilled", "cancelled"]
+                      "enum": [
+                        "pending",
+                        "confirmed",
+                        "fulfilled",
+                        "cancelled"
+                      ]
                     },
                     "customerName": {
                       "type": "string"
@@ -3973,7 +4315,9 @@
     "/api/v1/stores/{storeId}/orders/{orderId}/cancel": {
       "post": {
         "summary": "Cancelar pedido y devolver stock",
-        "tags": ["orders"],
+        "tags": [
+          "orders"
+        ],
         "parameters": [
           {
             "schema": {
@@ -4019,7 +4363,12 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": ["pending", "confirmed", "fulfilled", "cancelled"]
+                      "enum": [
+                        "pending",
+                        "confirmed",
+                        "fulfilled",
+                        "cancelled"
+                      ]
                     },
                     "customerName": {
                       "type": "string"
@@ -4131,7 +4480,9 @@
     "/api/v1/stores/{storeId}/audit": {
       "get": {
         "summary": "Auditoría de la tienda",
-        "tags": ["audit"],
+        "tags": [
+          "audit"
+        ],
         "parameters": [
           {
             "schema": {
@@ -4245,7 +4596,12 @@
                       "maximum": 9007199254740991
                     }
                   },
-                  "required": ["items", "total", "limit", "offset"],
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "offset"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4257,7 +4613,9 @@
     "/api/v1/platform/stores/{storeId}/audit": {
       "get": {
         "summary": "Auditoría de una tienda (administrador general)",
-        "tags": ["platform"],
+        "tags": [
+          "platform"
+        ],
         "parameters": [
           {
             "schema": {
@@ -4371,7 +4729,12 @@
                       "maximum": 9007199254740991
                     }
                   },
-                  "required": ["items", "total", "limit", "offset"],
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "offset"
+                  ],
                   "additionalProperties": false
                 }
               }

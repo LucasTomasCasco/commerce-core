@@ -5,8 +5,13 @@ on:
     branches: [main]
   pull_request:
 
+env:
+  DATABASE_URL: postgres://commerce:commerce@localhost:5432/commerce_core
+  PLATFORM_ADMIN_EMAIL: admin@commerce-core.local
+  PLATFORM_ADMIN_PASSWORD: ci-admin-password-123
+
 jobs:
-  check:
+  checks:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -22,8 +27,6 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
-    env:
-      DATABASE_URL: postgres://commerce:commerce@localhost:5432/commerce_core
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -35,4 +38,56 @@ jobs:
       - run: pnpm lint
       - run: pnpm format:check
       - run: pnpm typecheck
+      - name: El openapi.json versionado coincide con las rutas
+        run: pnpm openapi:check
+      - run: pnpm --filter @commerce-core/api db:migrate
       - run: pnpm test
+
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: commerce
+          POSTGRES_PASSWORD: commerce
+          POSTGRES_DB: commerce_core
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U commerce -d commerce_core"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      mailpit:
+        image: axllent/mailpit:v1.34.0
+        ports:
+          - 1025:1025
+          - 8025:8025
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @commerce-core/api db:migrate
+      - run: pnpm --filter @commerce-core/api db:seed
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm e2e
+      - name: Reporte de Playwright
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            test-results
+            playwright-report
+
+  images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f apps/api/Dockerfile -t commerce-core/api:ci .
+      - run: docker build -f apps/web/Dockerfile -t commerce-core/web:ci .

@@ -1,28 +1,93 @@
 # Commerce Core
 
-Backend y panel multi-tienda para comercios pequeños: catálogo, stock, pedidos y equipo con permisos por tienda.
+Backend y panel multi-tienda para comercios pequeños: tiendas aisladas, catálogo, stock con ledger, pedidos y equipo con permisos a medida.
 
-## Requisitos
+Incluye API REST documentada (OpenAPI), panel de administración, storefront público y un E2E en navegador que recorre el flujo completo.
 
-- Node.js 22+
-- pnpm
-- Docker
+## Stack
+
+| Capa          | Tecnología                                                           |
+| ------------- | -------------------------------------------------------------------- |
+| API           | Node.js 22, TypeScript, Fastify 5, Zod 4                             |
+| Base de datos | PostgreSQL 16, Drizzle ORM, Row-Level Security                       |
+| Autenticación | Sesiones opacas en base, cookie `httpOnly`, Argon2id                 |
+| Web           | React, Vite, React Router, TanStack Query, Tailwind v4               |
+| Contrato      | OpenAPI generado desde las rutas; cliente tipado con `openapi-fetch` |
+| Tests         | Vitest (integración contra PostgreSQL real), Playwright (E2E)        |
+| Infra local   | Docker Compose: PostgreSQL, Mailpit (correo de prueba), API, web     |
+
+## Estructura
+
+```
+apps/api/      API (Fastify), migraciones, seed, tests de integración
+apps/web/      SPA React (panel, storefront público)
+e2e/           Flujo completo en navegador (Playwright)
+docs/adr/      Decisiones de arquitectura
+```
+
+Capas de la API: `routes` (validación de entrada, sesión y permisos) → `services` (reglas de negocio y transacciones) → base de datos (constraints y RLS como última defensa).
+
+## Roles y permisos
+
+- **Administrador general (plataforma):** crea tiendas e invita a sus propietarios, administra monedas y suspende tiendas. No opera productos ni pedidos de las tiendas.
+- **Propietario:** todo dentro de su tienda. Una sola membresía propietaria por tienda.
+- **Staff:** lo que permita su rol. Cada tienda arranca con dos roles (Vendedor y Depósito) y el propietario crea los que necesite. El catálogo de permisos está en `apps/api/src/domain/permissions.ts`.
+
+Una tienda ajena responde 404, igual que una tienda inexistente, para no revelar qué datos existen.
 
 ## Desarrollo local
 
+Requisitos: Node 22+, pnpm, Docker.
+
 ```bash
-cp .env.example .env
+cp .env.example .env          # ajustar PLATFORM_ADMIN_PASSWORD
 pnpm install
-pnpm db:up        # PostgreSQL en :5432 y Mailpit en :8025
-pnpm dev:api      # API en :3000
-pnpm dev:web      # Web en :5173
+pnpm db:up                    # PostgreSQL en :5432 y Mailpit en :8025
+pnpm --filter @commerce-core/api db:migrate
+pnpm --filter @commerce-core/api db:seed
+pnpm dev:api                  # API en :3000 (o PORT=...)
+pnpm dev:web                  # web en :5173, proxy a la API con API_URL
 ```
+
+Si el puerto 3000 está ocupado, levantar la API en otro puerto y apuntar la web con `API_URL=http://localhost:3100 pnpm dev:web`.
+
+## Stack completo con Docker
+
+```bash
+docker compose up -d --build
+```
+
+- Web y API: http://localhost:8090 (`WEB_PORT` lo cambia)
+- Documentación interactiva: http://localhost:8090/docs
+- Correo de prueba (invitaciones y reseteos): http://localhost:8025
+
+El administrador general se crea con `PLATFORM_ADMIN_EMAIL` y `PLATFORM_ADMIN_PASSWORD` del `.env`.
+
+## Datos de demo
+
+`db:seed` crea monedas, el administrador general y la tienda **Casa Roble** (ficticia) con su propietaria `lucia@casa-roble.example`.
+
+**Solo para desarrollo:** la contraseña demo de esa cuenta es pública en `apps/api/src/db/seed.ts`. No usar en un entorno real.
 
 ## Scripts
 
-| Script              | Qué hace                                  |
-| ------------------- | ----------------------------------------- |
-| `pnpm lint`         | ESLint con reglas estrictas de TypeScript |
-| `pnpm format:check` | Verifica formato con Prettier             |
-| `pnpm typecheck`    | Verifica tipos en todos los paquetes      |
-| `pnpm test`         | Tests de todos los paquetes               |
+| Script               | Qué hace                                                   |
+| -------------------- | ---------------------------------------------------------- |
+| `pnpm lint`          | ESLint con reglas estrictas de TypeScript                  |
+| `pnpm format:check`  | Verifica formato con Prettier                              |
+| `pnpm typecheck`     | Typecheck de todos los paquetes                            |
+| `pnpm test`          | Tests de integración de la API                             |
+| `pnpm openapi:check` | Falla si `apps/api/openapi.json` no coincide con las rutas |
+| `pnpm e2e`           | Flujo completo en navegador                                |
+
+Para el E2E: `pnpm e2e` levanta la API y la web si no están corriendo. Contra un stack ya levantado (por ejemplo Docker): `E2E_BASE_URL=http://localhost:8090 pnpm e2e`.
+
+## Decisiones
+
+- [ADR 0001: Aislamiento por tienda con RLS](docs/adr/0001-tenancy-rls.md)
+- [ADR 0002: Sesiones opacas en lugar de JWT](docs/adr/0002-sesiones-opacas.md)
+- [ADR 0003: Stock como ledger y descuento al crear el pedido](docs/adr/0003-stock-ledger.md)
+
+## Fuera de v1
+
+Variantes de producto (talle, color), pagos y facturación, SSR para SEO del storefront, dominios propios por tienda, planes y cobro, límites de empleados por plan, precios multi-moneda por producto, 2FA, proveedor de email real y transferencia de propietario desde la UI.
