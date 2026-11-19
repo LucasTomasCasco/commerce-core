@@ -18,12 +18,17 @@
     "format:check": "prettier --check .",
     "test": "pnpm -r test",
     "db:up": "docker compose up -d postgres mailpit",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "e2e": "playwright test -c e2e/playwright.config.ts",
+    "openapi:check": "pnpm --filter @commerce-core/api openapi:export && git diff --exit-code apps/api/openapi.json"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^22.20.5",
     "eslint": "^10.15.0",
     "prettier": "^3.10.1",
+    "typescript": "~5.9.3",
     "typescript-eslint": "^8.73.0"
   }
 }
