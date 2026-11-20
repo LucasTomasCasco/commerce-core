@@ -21,6 +21,7 @@ import {
 import { errorText } from "./catalog-pages.js";
 
 const STORES_PAGE_SIZE = 20;
+const AUDIT_PAGE_SIZE = 25;
 
 export function StoresAdminPage() {
   const queryClient = useQueryClient();
@@ -168,12 +169,13 @@ export function PlatformStorePage() {
     queryFn: () =>
       unwrap(api.GET("/api/v1/platform/stores/{storeId}", { params: { path: { storeId } } })),
   });
+  const [auditOffset, setAuditOffset] = useState(0);
   const audit = useSuspenseQuery({
-    queryKey: ["platform-audit", storeId],
+    queryKey: ["platform-audit", storeId, auditOffset],
     queryFn: () =>
       unwrap(
         api.GET("/api/v1/platform/stores/{storeId}/audit", {
-          params: { path: { storeId }, query: { limit: 50 } },
+          params: { path: { storeId }, query: { limit: AUDIT_PAGE_SIZE, offset: auditOffset } },
         }),
       ),
   });
@@ -263,6 +265,12 @@ export function PlatformStorePage() {
             ))}
           </Table>
         )}
+        <Pager
+          total={audit.data.total}
+          limit={AUDIT_PAGE_SIZE}
+          offset={auditOffset}
+          onChange={setAuditOffset}
+        />
       </section>
     </>
   );
