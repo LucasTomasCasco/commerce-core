@@ -43,7 +43,7 @@ export const teamRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.get(
     "/stores/:storeId/members",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["team"],
         summary: "Miembros de la tienda",
@@ -57,7 +57,7 @@ export const teamRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.post(
     "/stores/:storeId/invitations",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["team"],
         summary: "Invitar staff por email con un rol",
@@ -80,7 +80,7 @@ export const teamRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.patch(
     "/stores/:storeId/members/:memberId",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["team"],
         summary: "Cambiar el rol de un miembro",
@@ -103,7 +103,7 @@ export const teamRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.delete(
     "/stores/:storeId/members/:memberId",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["team"],
         summary: "Quitar un miembro de la tienda",
@@ -124,7 +124,7 @@ export const teamRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.get(
     "/stores/:storeId/invitations",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["team"],
         summary: "Invitaciones pendientes",
@@ -138,7 +138,7 @@ export const teamRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.delete(
     "/stores/:storeId/invitations/:invitationId",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["team"],
         summary: "Revocar una invitación pendiente",
@@ -159,7 +159,7 @@ export const teamRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.post(
     "/stores/:storeId/invitations/:invitationId/resend",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["team"],
         summary: "Reenviar una invitación pendiente (invalida el enlace anterior)",
@@ -180,7 +180,7 @@ export const teamRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.get(
     "/stores/:storeId/roles",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["team"],
         summary: "Roles de la tienda",
@@ -194,7 +194,7 @@ export const teamRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.post(
     "/stores/:storeId/roles",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["team"],
         summary: "Crear un rol con permisos a medida",
@@ -220,7 +220,7 @@ export const teamRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.patch(
     "/stores/:storeId/roles/:roleId",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["team"],
         summary: "Editar un rol",
@@ -246,7 +246,7 @@ export const teamRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.delete(
     "/stores/:storeId/roles/:roleId",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["team"],
         summary: "Eliminar un rol sin miembros asignados",

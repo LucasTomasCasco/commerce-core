@@ -25,7 +25,7 @@ export const auditRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.get(
     "/stores/:storeId/audit",
     {
-      preHandler: [requireSession(auth), requireStoreAccess(app.db, "audit:read")],
+      preValidation: [requireSession(auth), requireStoreAccess(app.db, "audit:read")],
       schema: {
         tags: ["audit"],
         summary: "Auditoría de la tienda",
@@ -41,7 +41,7 @@ export const auditRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.get(
     "/platform/stores/:storeId/audit",
     {
-      preHandler: [requireSession(auth), requirePlatformAdmin()],
+      preValidation: [requireSession(auth), requirePlatformAdmin()],
       schema: {
         tags: ["platform"],
         summary: "Auditoría de una tienda (administrador general)",

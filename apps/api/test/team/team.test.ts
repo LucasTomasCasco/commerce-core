@@ -81,8 +81,8 @@ describe("equipo, roles e invitaciones de staff", () => {
     const sent = ctx.sent.findLast((m) => m.to === email);
     const accept = await ctx.app.inject({
       method: "POST",
-      url: `/api/v1/invitations/${tokenFrom(sent?.text)}/accept`,
-      payload: { fullName: email, password: PASSWORD },
+      url: "/api/v1/invitations/accept",
+      payload: { token: tokenFrom(sent?.text), fullName: email, password: PASSWORD },
     });
     expect(accept.statusCode).toBe(200);
     return accept.cookies.find((c) => c.name === "cc_session")?.value ?? "";

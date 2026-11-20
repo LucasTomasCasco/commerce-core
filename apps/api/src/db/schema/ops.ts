@@ -35,3 +35,24 @@ export const idempotencyKeys = pgTable(
   },
   (t) => [unique("idempotency_keys_store_key_key").on(t.storeId, t.key)],
 );
+
+// Cola de emails: se escribe en la misma transacción que la acción que lo origina.
+// Un worker lo envía con reintentos; así un SMTP caído no rompe el alta ni deja emails perdidos.
+export const outboxEmails = pgTable(
+  "outbox_emails",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    recipient: text().notNull(),
+    subject: text().notNull(),
+    body: text().notNull(),
+    status: text({ enum: ["pending", "sent", "failed"] })
+      .notNull()
+      .default("pending"),
+    attempts: integer().notNull().default(0),
+    lastError: text(),
+    nextAttemptAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    sentAt: timestamp({ withTimezone: true }),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("outbox_emails_due_idx").on(t.status, t.nextAttemptAt)],
+);

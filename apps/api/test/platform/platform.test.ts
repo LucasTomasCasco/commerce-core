@@ -89,11 +89,15 @@ describe("administración de plataforma", () => {
     await createStore(adminToken, {});
     const token = tokenFrom(ctx.sent[0]?.text);
 
-    const preview = await ctx.app.inject({ method: "GET", url: `/api/v1/invitations/${token}` });
+    const preview = await ctx.app.inject({
+      method: "POST",
+      url: "/api/v1/invitations/preview",
+      payload: { token },
+    });
     const accept = await ctx.app.inject({
       method: "POST",
-      url: `/api/v1/invitations/${token}/accept`,
-      payload: { fullName: "Dueña", password: PASSWORD },
+      url: "/api/v1/invitations/accept",
+      payload: { token: token, fullName: "Dueña", password: PASSWORD },
     });
     const storeId = accept.json<{ storeId: string }>().storeId;
     const access = await ctx.app.inject({
@@ -117,14 +121,14 @@ describe("administración de plataforma", () => {
     const token = tokenFrom(ctx.sent[0]?.text);
     await ctx.app.inject({
       method: "POST",
-      url: `/api/v1/invitations/${token}/accept`,
-      payload: { fullName: "Dueña", password: PASSWORD },
+      url: "/api/v1/invitations/accept",
+      payload: { token: token, fullName: "Dueña", password: PASSWORD },
     });
 
     const again = await ctx.app.inject({
       method: "POST",
-      url: `/api/v1/invitations/${token}/accept`,
-      payload: { fullName: "Dueña", password: PASSWORD },
+      url: "/api/v1/invitations/accept",
+      payload: { token: token, fullName: "Dueña", password: PASSWORD },
     });
 
     expect(again.statusCode).toBe(400);
@@ -138,15 +142,15 @@ describe("administración de plataforma", () => {
 
     const anonymous = await ctx.app.inject({
       method: "POST",
-      url: `/api/v1/invitations/${token}/accept`,
-      payload: {},
+      url: "/api/v1/invitations/accept",
+      payload: { token: token },
     });
     const { token: ownSession } = await ctx.app.services.auth.login("dueno@example.com", PASSWORD);
     const owned = await ctx.app.inject({
       method: "POST",
-      url: `/api/v1/invitations/${token}/accept`,
+      url: "/api/v1/invitations/accept",
       cookies: { cc_session: ownSession },
-      payload: {},
+      payload: { token },
     });
 
     expect(anonymous.statusCode).toBe(403);

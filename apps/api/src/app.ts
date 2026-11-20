@@ -1,8 +1,8 @@
 import cookie from "@fastify/cookie";
 import helmet from "@fastify/helmet";
+import rateLimit from "@fastify/rate-limit";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import rateLimit from "@fastify/rate-limit";
 import Fastify from "fastify";
 import {
   jsonSchemaTransform,
@@ -10,10 +10,10 @@ import {
   validatorCompiler,
   type ZodTypeProvider,
 } from "fastify-type-provider-zod";
-import type { Mailer } from "./auth/mailer.js";
 import type { Env } from "./config/env.js";
 import type { Db } from "./db/client.js";
 import { registerErrorHandler } from "./http/error-handler.js";
+import { AppError } from "./http/errors.js";
 import { authRoutes } from "./routes/auth.js";
 import { healthRoutes } from "./routes/health.js";
 import { storesRoutes } from "./routes/stores.js";
@@ -30,29 +30,56 @@ import { createServices } from "./services.js";
 export type AppDeps = {
   env: Env;
   db: Db;
-  mailer: Mailer;
 };
 
-export async function buildApp({ env, db, mailer }: AppDeps) {
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+
+export async function buildApp({ env, db }: AppDeps) {
   const app = Fastify({
     logger: {
       level: env.LOG_LEVEL,
-      redact: ["req.headers.cookie", "res.headers['set-cookie']", "*.password", "*.token"],
+      // Contraseñas, tokens y cookies nunca salen en logs (los tokens ya no viajan en la URL).
+      redact: [
+        "req.headers.cookie",
+        "res.headers['set-cookie']",
+        "req.body.password",
+        "req.body.token",
+        "req.body.newPassword",
+        "*.password",
+        "*.token",
+      ],
     },
     requestIdHeader: "x-request-id",
+    // Solo se confía en X-Forwarded-For de los saltos de proxy configurados (nginx = 1).
+    trustProxy:
+      env.TRUST_PROXY === 0 ? false : (_address: string, hop: number) => hop < env.TRUST_PROXY,
   }).withTypeProvider<ZodTypeProvider>();
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
   registerErrorHandler(app);
 
-  // La API sirve JSON; el CSP de helmet se desactiva para que Swagger UI cargue sus scripts.
+  // Protección CSRF: la cookie de sesión es SameSite=Lax, y además todo request que cambia estado
+  // y declara un Origin distinto del propio se rechaza. Sin Origin (curl, servidor a servidor) pasa.
+  app.addHook("onRequest", (request, _reply, done) => {
+    if (SAFE_METHODS.has(request.method)) {
+      done();
+      return;
+    }
+    const origin = request.headers.origin;
+    if (origin !== undefined && origin !== env.APP_ORIGIN) {
+      done(new AppError(403, "CSRF_ORIGIN_MISMATCH", "Origen de la petición no permitido"));
+      return;
+    }
+    done();
+  });
+
   await app.register(helmet, { contentSecurityPolicy: false });
   await app.register(cookie);
   await app.register(rateLimit, { global: false });
 
   app.decorate("db", db);
-  app.decorate("services", createServices({ db, mailer, env }));
+  app.decorate("services", createServices({ db, env }));
   app.decorateRequest("auth", null);
   app.decorateRequest("store", null);
 

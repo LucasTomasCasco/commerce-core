@@ -15,6 +15,13 @@ export function AppLayout() {
     await navigate("/login", { replace: true });
   }
 
+  // Cierra la sesión en este dispositivo y en todos los demás.
+  async function logoutEverywhere() {
+    await unwrap(api.POST("/api/v1/auth/logout-all"));
+    queryClient.removeQueries();
+    await navigate("/login", { replace: true });
+  }
+
   return (
     <div className="min-h-screen">
       <header className="border-b border-slate-200 bg-white">
@@ -36,6 +43,9 @@ export function AppLayout() {
             <span className="hidden text-slate-500 sm:inline">{me.data?.fullName}</span>
             <Button variant="secondary" onClick={() => void logout()}>
               Salir
+            </Button>
+            <Button variant="secondary" onClick={() => void logoutEverywhere()}>
+              Salir de todos
             </Button>
           </div>
         </div>

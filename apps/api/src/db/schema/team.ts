@@ -73,6 +73,9 @@ export const invitations = pgTable(
     expiresAt: timestamp({ withTimezone: true }).notNull(),
     acceptedAt: timestamp({ withTimezone: true }),
     revokedAt: timestamp({ withTimezone: true }),
+    // Transferencia de propiedad: al aceptar, este miembro deja de ser propietario y pasa a replacementRoleId.
+    replacesMemberId: uuid(),
+    replacementRoleId: uuid(),
     createdByUserId: uuid()
       .notNull()
       .references(() => users.id),
@@ -83,6 +86,11 @@ export const invitations = pgTable(
     foreignKey({
       name: "invitations_role_fk",
       columns: [t.storeId, t.roleId],
+      foreignColumns: [storeRoles.storeId, storeRoles.id],
+    }),
+    foreignKey({
+      name: "invitations_replacement_role_fk",
+      columns: [t.storeId, t.replacementRoleId],
       foreignColumns: [storeRoles.storeId, storeRoles.id],
     }),
   ],

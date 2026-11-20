@@ -1,23 +1,25 @@
 import type { FastifyPluginCallbackZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { sessionCookieOptions, SESSION_COOKIE, optionalSession } from "../http/session.js";
 import type { Env } from "../config/env.js";
+import { passwordSchema } from "../http/schemas.js";
+import { optionalSession, sessionCookieOptions, SESSION_COOKIE } from "../http/session.js";
 
-const tokenParams = z.object({ token: z.string().min(1) });
+// El token viaja en el body, nunca en la URL: las URLs quedan en logs de proxies y del servidor.
+const tokenBody = z.object({ token: z.string().min(1).max(200) });
 
 export function invitationRoutes(env: Env): FastifyPluginCallbackZod {
   return (app, _options, done) => {
     const rateLimit = { max: env.AUTH_RATE_LIMIT_MAX, timeWindow: "15 minutes" };
     const service = app.services.invitations;
 
-    app.get(
-      "/invitations/:token",
+    app.post(
+      "/invitations/preview",
       {
         config: { rateLimit },
         schema: {
           tags: ["team"],
           summary: "Datos de una invitación pendiente",
-          params: tokenParams,
+          body: tokenBody,
           response: {
             200: z.object({
               email: z.email(),
@@ -28,27 +30,26 @@ export function invitationRoutes(env: Env): FastifyPluginCallbackZod {
           },
         },
       },
-      (request) => service.preview(request.params.token),
+      (request) => service.preview(request.body.token),
     );
 
     app.post(
-      "/invitations/:token/accept",
+      "/invitations/accept",
       {
         config: { rateLimit },
-        preHandler: optionalSession(app.services.auth),
+        preValidation: optionalSession(app.services.auth),
         schema: {
           tags: ["team"],
           summary: "Aceptar una invitación",
-          params: tokenParams,
-          body: z.object({
+          body: tokenBody.extend({
             fullName: z.string().trim().min(1).max(120).optional(),
-            password: z.string().min(10).max(200).optional(),
+            password: passwordSchema.optional(),
           }),
           response: { 200: z.object({ storeId: z.uuid() }) },
         },
       },
       async (request, reply) => {
-        const { storeId, sessionToken } = await service.accept(request.params.token, {
+        const { storeId, sessionToken } = await service.accept(request.body.token, {
           sessionUser: request.auth?.user ?? null,
           fullName: request.body.fullName,
           password: request.body.password,

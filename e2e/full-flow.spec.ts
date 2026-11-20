@@ -45,7 +45,7 @@ test("alta de tienda, equipo con permisos, pedidos y storefront", async ({ page 
   await expect(page.getByText("Invitación enviada.")).toBeVisible();
 
   // 4. El staff acepta, ve solo lo que su rol permite y no puede administrar el equipo.
-  await page.getByRole("button", { name: "Salir" }).click();
+  await page.getByRole("button", { name: "Salir", exact: true }).click();
   await acceptInvitation(page, STAFF_EMAIL, "Caja E2E");
   await expect(page.getByRole("link", { name: "Pedidos" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Equipo" })).toHaveCount(0);
@@ -53,7 +53,7 @@ test("alta de tienda, equipo con permisos, pedidos y storefront", async ({ page 
   await expect(page.getByText("No tienes permiso para esta acción")).toBeVisible();
 
   // 5. El propietario carga un producto y registra la entrada de stock.
-  await page.getByRole("button", { name: "Salir" }).click();
+  await page.getByRole("button", { name: "Salir", exact: true }).click();
   await login(page, OWNER_EMAIL, PASSWORD);
   await page.goto(`/tiendas/${storeId}/productos`);
   const productForm = page.locator("form", {
@@ -129,7 +129,7 @@ async function login(page: Page, email: string, password: string) {
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Contraseña").fill(password);
   await page.getByRole("button", { name: "Ingresar" }).click();
-  await expect(page.getByRole("button", { name: "Salir" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Salir", exact: true })).toBeVisible();
 }
 
 async function acceptInvitation(page: Page, email: string, fullName: string) {

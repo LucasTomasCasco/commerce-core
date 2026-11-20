@@ -86,8 +86,8 @@ describe("invitaciones pendientes", () => {
     );
     const accept = await ctx.app.inject({
       method: "POST",
-      url: `/api/v1/invitations/${tokenFrom(text)}/accept`,
-      payload: { fullName: "Ana", password: PASSWORD },
+      url: "/api/v1/invitations/accept",
+      payload: { token: tokenFrom(text), fullName: "Ana", password: PASSWORD },
     });
 
     expect(revoked.statusCode).toBe(204);
@@ -107,13 +107,13 @@ describe("invitaciones pendientes", () => {
     const newText = ctx.sent.findLast((m) => m.to === "ana@invita.example")?.text;
     const oldAccept = await ctx.app.inject({
       method: "POST",
-      url: `/api/v1/invitations/${tokenFrom(oldText)}/accept`,
-      payload: { fullName: "Ana", password: PASSWORD },
+      url: "/api/v1/invitations/accept",
+      payload: { token: tokenFrom(oldText), fullName: "Ana", password: PASSWORD },
     });
     const newAccept = await ctx.app.inject({
       method: "POST",
-      url: `/api/v1/invitations/${tokenFrom(newText)}/accept`,
-      payload: { fullName: "Ana", password: PASSWORD },
+      url: "/api/v1/invitations/accept",
+      payload: { token: tokenFrom(newText), fullName: "Ana", password: PASSWORD },
     });
 
     expect(resend.statusCode).toBe(202);
@@ -145,8 +145,8 @@ describe("invitaciones pendientes", () => {
     const newText = ctx.sent.findLast((m) => m.to === "dueno@reenvio.example")?.text;
     const oldAccept = await ctx.app.inject({
       method: "POST",
-      url: `/api/v1/invitations/${tokenFrom(oldText)}/accept`,
-      payload: { fullName: "Dueño", password: PASSWORD },
+      url: "/api/v1/invitations/accept",
+      payload: { token: tokenFrom(oldText), fullName: "Dueño", password: PASSWORD },
     });
 
     expect(resend.statusCode).toBe(202);
@@ -155,8 +155,8 @@ describe("invitaciones pendientes", () => {
 
     await ctx.app.inject({
       method: "POST",
-      url: `/api/v1/invitations/${tokenFrom(newText)}/accept`,
-      payload: { fullName: "Dueño", password: PASSWORD },
+      url: "/api/v1/invitations/accept",
+      payload: { token: tokenFrom(newText), fullName: "Dueño", password: PASSWORD },
     });
     const after = await ctx.app.inject({
       method: "POST",

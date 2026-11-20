@@ -54,8 +54,12 @@ export async function onboardStore(
   const invitation = ctx.sent.findLast((m) => m.to === input.ownerEmail);
   const accept = await ctx.app.inject({
     method: "POST",
-    url: `/api/v1/invitations/${tokenFrom(invitation?.text)}/accept`,
-    payload: { fullName: "Dueña de prueba", password: PASSWORD },
+    url: "/api/v1/invitations/accept",
+    payload: {
+      token: tokenFrom(invitation?.text),
+      fullName: "Dueña de prueba",
+      password: PASSWORD,
+    },
   });
   if (accept.statusCode !== 200) throw new Error(`No se aceptó la invitación: ${accept.body}`);
   const ownerToken = accept.cookies.find((c) => c.name === "cc_session")?.value;

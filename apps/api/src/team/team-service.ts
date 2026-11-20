@@ -154,48 +154,48 @@ export function createTeamService({ db, invitations }: TeamServiceDeps) {
     email: string;
     roleId: string;
   }) {
-    const { token, storeName, roleName } = await withDbContext(
-      db,
-      { storeId: input.storeId, userId: input.actorUserId },
-      async (tx) => {
-        const role = await findRole(tx, input.storeId, input.roleId);
-        if (role.isSystem) {
-          throw new AppError(400, "INVALID_ROLE", "No se puede invitar como propietario");
-        }
-        const [member] = await tx
-          .select({ id: storeMembers.id })
-          .from(storeMembers)
-          .innerJoin(users, eq(users.id, storeMembers.userId))
-          .where(and(eq(storeMembers.storeId, input.storeId), eq(users.email, input.email)))
-          .limit(1);
-        if (member)
-          throw new AppError(409, "ALREADY_MEMBER", "Esa persona ya es miembro de la tienda");
+    await withDbContext(db, { storeId: input.storeId, userId: input.actorUserId }, async (tx) => {
+      const role = await findRole(tx, input.storeId, input.roleId);
+      if (role.isSystem) {
+        throw new AppError(400, "INVALID_ROLE", "No se puede invitar como propietario");
+      }
+      const [member] = await tx
+        .select({ id: storeMembers.id })
+        .from(storeMembers)
+        .innerJoin(users, eq(users.id, storeMembers.userId))
+        .where(and(eq(storeMembers.storeId, input.storeId), eq(users.email, input.email)))
+        .limit(1);
+      if (member)
+        throw new AppError(409, "ALREADY_MEMBER", "Esa persona ya es miembro de la tienda");
 
-        const [store] = await tx
-          .select({ name: stores.name })
-          .from(stores)
-          .where(eq(stores.id, input.storeId))
-          .limit(1);
-        if (!store) throw new AppError(404, "STORE_NOT_FOUND", "Tienda no encontrada");
+      const [store] = await tx
+        .select({ name: stores.name })
+        .from(stores)
+        .where(eq(stores.id, input.storeId))
+        .limit(1);
+      if (!store) throw new AppError(404, "STORE_NOT_FOUND", "Tienda no encontrada");
 
-        const token = await invitations.createInvitation(tx, {
-          storeId: input.storeId,
-          email: input.email,
-          roleId: role.id,
-          createdByUserId: input.actorUserId,
-        });
-        await recordAudit(tx, {
-          storeId: input.storeId,
-          actorUserId: input.actorUserId,
-          action: "invitation.created",
-          entity: "invitation",
-          entityId: input.email,
-          metadata: { roleId: role.id },
-        });
-        return { token, storeName: store.name, roleName: role.name };
-      },
-    );
-    await invitations.sendInvitationEmail({ email: input.email, storeName, roleName, token });
+      const token = await invitations.createInvitation(tx, {
+        storeId: input.storeId,
+        email: input.email,
+        roleId: role.id,
+        createdByUserId: input.actorUserId,
+      });
+      await recordAudit(tx, {
+        storeId: input.storeId,
+        actorUserId: input.actorUserId,
+        action: "invitation.created",
+        entity: "invitation",
+        entityId: input.email,
+        metadata: { roleId: role.id },
+      });
+      await invitations.enqueueInvitationEmail(tx, {
+        email: input.email,
+        storeName: store.name,
+        roleName: role.name,
+        token,
+      });
+    });
   }
 
   async function changeMemberRole(input: {
@@ -298,45 +298,45 @@ export function createTeamService({ db, invitations }: TeamServiceDeps) {
     actorUserId: string;
     invitationId: string;
   }) {
-    const sent = await withDbContext(
-      db,
-      { storeId: input.storeId, userId: input.actorUserId },
-      async (tx) => {
-        const invitation = await findPendingInvitation(tx, input.storeId, input.invitationId);
-        const [store] = await tx
-          .select({ name: stores.name })
-          .from(stores)
-          .where(eq(stores.id, input.storeId))
-          .limit(1);
-        const [role] = await tx
-          .select({ name: storeRoles.name })
-          .from(storeRoles)
-          .where(eq(storeRoles.id, invitation.roleId))
-          .limit(1);
-        if (!store || !role) throw new Error("La invitación apunta a una tienda o rol inexistente");
+    await withDbContext(db, { storeId: input.storeId, userId: input.actorUserId }, async (tx) => {
+      const invitation = await findPendingInvitation(tx, input.storeId, input.invitationId);
+      const [store] = await tx
+        .select({ name: stores.name })
+        .from(stores)
+        .where(eq(stores.id, input.storeId))
+        .limit(1);
+      const [role] = await tx
+        .select({ name: storeRoles.name })
+        .from(storeRoles)
+        .where(eq(storeRoles.id, invitation.roleId))
+        .limit(1);
+      if (!store || !role) throw new Error("La invitación apunta a una tienda o rol inexistente");
 
-        await tx
-          .update(invitationRows)
-          .set({ revokedAt: new Date() })
-          .where(eq(invitationRows.id, invitation.id));
-        const token = await invitations.createInvitation(tx, {
-          storeId: input.storeId,
-          email: invitation.email,
-          roleId: invitation.roleId,
-          createdByUserId: input.actorUserId,
-        });
-        await recordAudit(tx, {
-          storeId: input.storeId,
-          actorUserId: input.actorUserId,
-          action: "invitation.resent",
-          entity: "invitation",
-          entityId: invitation.id,
-          metadata: { email: invitation.email },
-        });
-        return { token, email: invitation.email, storeName: store.name, roleName: role.name };
-      },
-    );
-    await invitations.sendInvitationEmail(sent);
+      await tx
+        .update(invitationRows)
+        .set({ revokedAt: new Date() })
+        .where(eq(invitationRows.id, invitation.id));
+      const token = await invitations.createInvitation(tx, {
+        storeId: input.storeId,
+        email: invitation.email,
+        roleId: invitation.roleId,
+        createdByUserId: input.actorUserId,
+      });
+      await recordAudit(tx, {
+        storeId: input.storeId,
+        actorUserId: input.actorUserId,
+        action: "invitation.resent",
+        entity: "invitation",
+        entityId: invitation.id,
+        metadata: { email: invitation.email },
+      });
+      await invitations.enqueueInvitationEmail(tx, {
+        email: invitation.email,
+        storeName: store.name,
+        roleName: role.name,
+        token,
+      });
+    });
   }
 
   return {

@@ -1,5 +1,5 @@
 import { Pager } from "../components/ui.js";
-import { PlatformStoreSettings } from "./store-settings.js";
+import { OwnerTransferForm, PlatformStoreSettings } from "./store-settings.js";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState, type SyntheticEvent } from "react";
 import { Link, useParams } from "react-router";
@@ -249,6 +249,9 @@ export function PlatformStorePage() {
       </div>
       <div className="mt-8">
         <PlatformStoreSettings storeId={storeId} currentName={s.name} />
+      </div>
+      <div className="mt-8">
+        <OwnerTransferForm storeId={storeId} />
       </div>
       <section className="mt-8 flex flex-col gap-3">
         <h2 className="font-semibold">Auditoría reciente</h2>

@@ -6,13 +6,19 @@ import { AppError } from "./errors.js";
 
 // Requiere membresía en la tienda de :storeId y, si se indica, el permiso.
 // Debe ir después de requireSession. Deja el acceso resuelto en request.store.
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function requireStoreAccess(db: Db, permission?: Permission): preHandlerAsyncHookHandler {
   return async (request) => {
     if (!request.auth) {
       throw new AppError(401, "UNAUTHENTICATED", "Necesitas iniciar sesión");
     }
-    // La ruta valida :storeId como uuid antes de llegar al guard.
+    // Se ejecuta antes de la validación de la ruta: el id llega sin validar. Un id que no es uuid
+    // se trata como tienda inexistente, sin consultar la base con un valor inválido.
     const { storeId } = request.params as { storeId: string };
+    if (!UUID_PATTERN.test(storeId)) {
+      throw new AppError(404, "STORE_NOT_FOUND", "Tienda no encontrada");
+    }
 
     const access = await resolveStoreAccess(db, { storeId, userId: request.auth.user.id });
     if (!access) {

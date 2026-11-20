@@ -1,8 +1,7 @@
+import { createAuditService } from "./audit/audit-service.js";
 import { createAuthService } from "./auth/auth-service.js";
-import type { Mailer } from "./auth/mailer.js";
 import type { Env } from "./config/env.js";
 import type { Db } from "./db/client.js";
-import { createAuditService } from "./audit/audit-service.js";
 import { createCatalogService } from "./catalog/catalog-service.js";
 import { createInventoryService } from "./inventory/inventory-service.js";
 import { createOrderService } from "./sales/order-service.js";
@@ -12,15 +11,24 @@ import { createTeamService } from "./team/team-service.js";
 
 export type ServicesDeps = {
   db: Db;
-  mailer: Mailer;
-  env: Pick<Env, "SESSION_TTL_DAYS" | "APP_ORIGIN">;
+  env: Pick<Env, "SESSION_TTL_DAYS" | "APP_ORIGIN" | "LOGIN_MAX_FAILURES" | "LOGIN_LOCK_MINUTES">;
 };
 
 // Un solo punto de construcción: cada servicio recibe sus dependencias explícitas.
-export function createServices({ db, mailer, env }: ServicesDeps) {
-  const deps = { db, mailer, sessionTtlDays: env.SESSION_TTL_DAYS, appOrigin: env.APP_ORIGIN };
-  const auth = createAuthService(deps);
-  const invitations = createInvitationService(deps);
+// Los emails no se envían desde los servicios: se encolan en la misma transacción (ver outbox).
+export function createServices({ db, env }: ServicesDeps) {
+  const auth = createAuthService({
+    db,
+    sessionTtlDays: env.SESSION_TTL_DAYS,
+    appOrigin: env.APP_ORIGIN,
+    loginMaxFailures: env.LOGIN_MAX_FAILURES,
+    loginLockMinutes: env.LOGIN_LOCK_MINUTES,
+  });
+  const invitations = createInvitationService({
+    db,
+    sessionTtlDays: env.SESSION_TTL_DAYS,
+    appOrigin: env.APP_ORIGIN,
+  });
   const team = createTeamService({ db, invitations });
   const platform = createPlatformService({ db, invitations, team });
   const catalog = createCatalogService({ db });

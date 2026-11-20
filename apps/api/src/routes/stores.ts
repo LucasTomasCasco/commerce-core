@@ -25,7 +25,7 @@ export const storesRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.get(
     "/me/stores",
     {
-      preHandler: requireSession(app.services.auth),
+      preValidation: requireSession(app.services.auth),
       schema: {
         tags: ["stores"],
         summary: "Tiendas en las que tengo membresía",
@@ -66,7 +66,7 @@ export const storesRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.get(
     "/stores/:storeId",
     {
-      preHandler: [requireSession(app.services.auth), requireStoreAccess(app.db)],
+      preValidation: [requireSession(app.services.auth), requireStoreAccess(app.db)],
       schema: {
         tags: ["stores"],
         summary: "Detalle de la tienda y mi acceso",
@@ -84,7 +84,10 @@ export const storesRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.patch(
     "/stores/:storeId",
     {
-      preHandler: [requireSession(app.services.auth), requireStoreAccess(app.db, "store:settings")],
+      preValidation: [
+        requireSession(app.services.auth),
+        requireStoreAccess(app.db, "store:settings"),
+      ],
       schema: {
         tags: ["stores"],
         summary: "Editar los datos de la tienda",

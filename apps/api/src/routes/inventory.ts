@@ -25,7 +25,7 @@ export const inventoryRoutes: FastifyPluginCallbackZod = (app, _options, done) =
   app.get(
     "/stores/:storeId/stock-movements",
     {
-      preHandler: read,
+      preValidation: read,
       schema: {
         tags: ["inventory"],
         summary: "Movimientos de stock",
@@ -40,7 +40,7 @@ export const inventoryRoutes: FastifyPluginCallbackZod = (app, _options, done) =
   app.post(
     "/stores/:storeId/stock-movements",
     {
-      preHandler: adjust,
+      preValidation: adjust,
       schema: {
         tags: ["inventory"],
         summary: "Registrar entrada o ajuste de stock",

@@ -30,7 +30,7 @@ export const platformRoutes: FastifyPluginCallbackZod = (app, _options, done) =>
   app.get(
     "/platform/stores",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["platform"],
         summary: "Listar tiendas",
@@ -44,7 +44,7 @@ export const platformRoutes: FastifyPluginCallbackZod = (app, _options, done) =>
   app.post(
     "/platform/stores",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["platform"],
         summary: "Crear tienda e invitar a su propietario",
@@ -69,7 +69,7 @@ export const platformRoutes: FastifyPluginCallbackZod = (app, _options, done) =>
   app.get(
     "/platform/stores/:storeId",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["platform"],
         summary: "Detalle de una tienda",
@@ -83,7 +83,7 @@ export const platformRoutes: FastifyPluginCallbackZod = (app, _options, done) =>
   app.patch(
     "/platform/stores/:storeId",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["platform"],
         summary: "Editar tienda o cambiar su estado",
@@ -108,7 +108,7 @@ export const platformRoutes: FastifyPluginCallbackZod = (app, _options, done) =>
   app.post(
     "/platform/stores/:storeId/owner-invitation/resend",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["platform"],
         summary: "Reenviar la invitación al propietario de una tienda",
@@ -126,9 +126,48 @@ export const platformRoutes: FastifyPluginCallbackZod = (app, _options, done) =>
   );
 
   app.get(
+    "/platform/stores/:storeId/roles",
+    {
+      preValidation: guard,
+      schema: {
+        tags: ["platform"],
+        summary: "Roles a los que puede pasar el propietario anterior",
+        params: z.object({ storeId: z.uuid() }),
+        response: {
+          200: z.object({ roles: z.array(z.object({ id: z.uuid(), name: z.string() })) }),
+        },
+      },
+    },
+    async (request) => ({ roles: await platform.listAssignableRoles(request.params.storeId) }),
+  );
+
+  app.post(
+    "/platform/stores/:storeId/owner-transfer",
+    {
+      preValidation: guard,
+      schema: {
+        tags: ["platform"],
+        summary: "Transferir la propiedad de la tienda a otra persona",
+        params: z.object({ storeId: z.uuid() }),
+        body: z.object({ ownerEmail: z.email(), demoteToRoleId: z.uuid() }),
+        response: { 202: z.null() },
+      },
+    },
+    async (request, reply) => {
+      await platform.transferOwnership({
+        actorUserId: currentAuth(request).user.id,
+        storeId: request.params.storeId,
+        ownerEmail: request.body.ownerEmail,
+        demoteToRoleId: request.body.demoteToRoleId,
+      });
+      return reply.code(202).send(null);
+    },
+  );
+
+  app.get(
     "/platform/currencies",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["platform"],
         summary: "Monedas disponibles",
@@ -141,7 +180,7 @@ export const platformRoutes: FastifyPluginCallbackZod = (app, _options, done) =>
   app.post(
     "/platform/currencies",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["platform"],
         summary: "Agregar una moneda",
@@ -159,7 +198,7 @@ export const platformRoutes: FastifyPluginCallbackZod = (app, _options, done) =>
   app.patch(
     "/platform/currencies/:code",
     {
-      preHandler: guard,
+      preValidation: guard,
       schema: {
         tags: ["platform"],
         summary: "Editar o desactivar una moneda",

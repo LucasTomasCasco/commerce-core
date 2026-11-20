@@ -29,7 +29,8 @@ export default defineConfig({
     : [
         {
           command: "pnpm --filter @commerce-core/api dev",
-          env: { PORT: API_PORT },
+          // Muchos logins desde la misma IP: el límite de producción no sirve para una suite E2E.
+          env: { PORT: API_PORT, AUTH_RATE_LIMIT_MAX: "500" },
           url: `http://localhost:${API_PORT}/api/v1/health`,
           reuseExistingServer: true,
           timeout: 60_000,

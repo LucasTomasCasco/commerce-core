@@ -1,4 +1,4 @@
-import { and, asc, count, eq, ilike, isNull, or, type SQL } from "drizzle-orm";
+import { and, asc, count, eq, ilike, isNull, or, sql, type SQL } from "drizzle-orm";
 import { recordAudit } from "../audit/record.js";
 import type { Db, Tx } from "../db/client.js";
 import { withDbContext } from "../db/tenant.js";
@@ -276,12 +276,15 @@ export function createCatalogService({ db }: CatalogServiceDeps) {
     filters: Omit<ProductFilters, "active" | "includeArchived">,
   ) {
     const store = await findPublicStore(slug);
-    const where = productFilterSql({
-      ...filters,
-      storeId: store.id,
-      active: true,
-      includeArchived: false,
-    });
+    const where = and(
+      productFilterSql({
+        ...filters,
+        storeId: store.id,
+        active: true,
+        includeArchived: false,
+      }),
+      visibleInPublicCatalog(store.id),
+    );
     const [items, [total]] = await withDbContext(db, { storeId: store.id }, (tx) =>
       Promise.all([
         tx
@@ -314,6 +317,7 @@ export function createCatalogService({ db }: CatalogServiceDeps) {
             eq(products.id, productId),
             eq(products.active, true),
             isNull(products.archivedAt),
+            visibleInPublicCatalog(store.id),
           ),
         )
         .limit(1);
@@ -352,6 +356,15 @@ function productFilterSql(input: { storeId: string } & Partial<ProductFilters>):
     conditions.push(or(ilike(products.name, pattern), ilike(products.sku, pattern)));
   }
   return and(...conditions);
+}
+
+// Un producto sin categoría o cuya categoría sigue activa es visible en el storefront.
+// Archivar una categoría la oculta junto con sus productos, sin tocar los datos del producto.
+function visibleInPublicCatalog(storeId: string): SQL {
+  return sql`(${products.categoryId} IS NULL OR ${products.categoryId} IN (
+    SELECT ${categories.id} FROM ${categories}
+    WHERE ${categories.storeId} = ${storeId} AND ${categories.archivedAt} IS NULL
+  ))`;
 }
 
 // Público: sin cantidades exactas de stock, solo disponibilidad.

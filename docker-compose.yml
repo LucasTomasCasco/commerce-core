@@ -59,6 +59,8 @@ services:
       DATABASE_URL: postgres://commerce:commerce@postgres:5432/commerce_core
       APP_ORIGIN: http://localhost:${WEB_PORT:-8090}
       SMTP_URL: smtp://mailpit:1025
+      # nginx es el único proxy delante de la API: su X-Forwarded-For es confiable (un salto).
+      TRUST_PROXY: 1
     depends_on:
       api-seed:
         condition: service_completed_successfully

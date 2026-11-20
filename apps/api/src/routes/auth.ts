@@ -7,8 +7,7 @@ import {
   sessionCookieOptions,
 } from "../http/session.js";
 import type { Env } from "../config/env.js";
-
-const PASSWORD_MIN_LENGTH = 10;
+import { passwordSchema } from "../http/schemas.js";
 
 const userSchema = z.object({
   id: z.uuid(),
@@ -16,8 +15,6 @@ const userSchema = z.object({
   fullName: z.string(),
   isPlatformAdmin: z.boolean(),
 });
-
-const passwordSchema = z.string().min(PASSWORD_MIN_LENGTH).max(200);
 
 export function authRoutes(env: Env): FastifyPluginCallbackZod {
   return (app, _options, done) => {
@@ -47,7 +44,7 @@ export function authRoutes(env: Env): FastifyPluginCallbackZod {
     app.post(
       "/logout",
       {
-        preHandler: requireSession(app.services.auth),
+        preValidation: requireSession(app.services.auth),
         schema: { tags: ["auth"], summary: "Cerrar sesión", response: { 204: z.null() } },
       },
       async (request, reply) => {
@@ -57,10 +54,27 @@ export function authRoutes(env: Env): FastifyPluginCallbackZod {
       },
     );
 
+    app.post(
+      "/logout-all",
+      {
+        preValidation: requireSession(app.services.auth),
+        schema: {
+          tags: ["auth"],
+          summary: "Cerrar sesión en todos los dispositivos",
+          response: { 204: z.null() },
+        },
+      },
+      async (request, reply) => {
+        await app.services.auth.logoutAll(currentAuth(request).user.id);
+        reply.clearCookie(SESSION_COOKIE, { path: "/" });
+        return reply.code(204).send(null);
+      },
+    );
+
     app.get(
       "/me",
       {
-        preHandler: requireSession(app.services.auth),
+        preValidation: requireSession(app.services.auth),
         schema: {
           tags: ["auth"],
           summary: "Usuario de la sesión actual",

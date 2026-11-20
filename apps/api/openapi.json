@@ -175,6 +175,30 @@
         }
       }
     },
+    "/api/v1/auth/logout-all": {
+      "post": {
+        "summary": "Cerrar sesión en todos los dispositivos",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "204": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "nullable": true,
+                  "enum": [
+                    null
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/me": {
       "get": {
         "summary": "Usuario de la sesión actual",
@@ -293,7 +317,17 @@
                   "password": {
                     "type": "string",
                     "minLength": 10,
-                    "maxLength": 200
+                    "maxLength": 200,
+                    "allOf": [
+                      {
+                        "type": "string",
+                        "pattern": "[A-Za-z]"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "\\d"
+                      }
+                    ]
                   }
                 },
                 "required": [
@@ -1839,6 +1873,127 @@
         }
       }
     },
+    "/api/v1/platform/stores/{storeId}/roles": {
+      "get": {
+        "summary": "Roles a los que puede pasar el propietario anterior",
+        "tags": [
+          "platform"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "storeId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "roles": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "roles"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/platform/stores/{storeId}/owner-transfer": {
+      "post": {
+        "summary": "Transferir la propiedad de la tienda a otra persona",
+        "tags": [
+          "platform"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  },
+                  "demoteToRoleId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  }
+                },
+                "required": [
+                  "ownerEmail",
+                  "demoteToRoleId"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "storeId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "nullable": true,
+                  "enum": [
+                    null
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/platform/currencies": {
       "get": {
         "summary": "Monedas disponibles",
@@ -2046,23 +2201,32 @@
         }
       }
     },
-    "/api/v1/invitations/{token}": {
-      "get": {
+    "/api/v1/invitations/preview": {
+      "post": {
         "summary": "Datos de una invitación pendiente",
         "tags": [
           "team"
         ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            },
-            "in": "path",
-            "name": "token",
-            "required": true
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "token"
+                ]
+              }
+            }
           }
-        ],
+        },
         "responses": {
           "200": {
             "description": "Default Response",
@@ -2100,7 +2264,7 @@
         }
       }
     },
-    "/api/v1/invitations/{token}/accept": {
+    "/api/v1/invitations/accept": {
       "post": {
         "summary": "Aceptar una invitación",
         "tags": [
@@ -2113,6 +2277,11 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "token": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
                   "fullName": {
                     "type": "string",
                     "minLength": 1,
@@ -2121,24 +2290,26 @@
                   "password": {
                     "type": "string",
                     "minLength": 10,
-                    "maxLength": 200
+                    "maxLength": 200,
+                    "allOf": [
+                      {
+                        "type": "string",
+                        "pattern": "[A-Za-z]"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "\\d"
+                      }
+                    ]
                   }
-                }
+                },
+                "required": [
+                  "token"
+                ]
               }
             }
           }
         },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            },
-            "in": "path",
-            "name": "token",
-            "required": true
-          }
-        ],
         "responses": {
           "200": {
             "description": "Default Response",

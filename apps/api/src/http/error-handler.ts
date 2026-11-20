@@ -42,6 +42,18 @@ export function registerErrorHandler(app: FastifyInstance) {
         });
       }
 
+      if (error.statusCode === 429) {
+        return sendProblem(
+          reply,
+          problemFor(
+            request,
+            429,
+            "RATE_LIMITED",
+            "Demasiadas solicitudes. Probá de nuevo en unos minutos",
+          ),
+        );
+      }
+
       if (error.statusCode && error.statusCode < 500) {
         const code = "REQUEST_ERROR";
         return sendProblem(reply, problemFor(request, error.statusCode, code, error.message));

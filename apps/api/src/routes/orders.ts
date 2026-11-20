@@ -51,7 +51,7 @@ export const orderRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.get(
     "/stores/:storeId/orders",
     {
-      preHandler: read,
+      preValidation: read,
       schema: {
         tags: ["orders"],
         summary: "Pedidos de la tienda",
@@ -66,7 +66,7 @@ export const orderRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.post(
     "/stores/:storeId/orders",
     {
-      preHandler: create,
+      preValidation: create,
       schema: {
         tags: ["orders"],
         summary: "Cargar un pedido manual",
@@ -99,7 +99,7 @@ export const orderRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.get(
     "/stores/:storeId/orders/:orderId",
     {
-      preHandler: read,
+      preValidation: read,
       schema: {
         tags: ["orders"],
         summary: "Detalle de pedido",
@@ -114,7 +114,7 @@ export const orderRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.post(
     "/stores/:storeId/orders/:orderId/confirm",
     {
-      preHandler: updateStatus,
+      preValidation: updateStatus,
       schema: {
         tags: ["orders"],
         summary: "Confirmar pedido pendiente",
@@ -135,7 +135,7 @@ export const orderRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.post(
     "/stores/:storeId/orders/:orderId/fulfill",
     {
-      preHandler: updateStatus,
+      preValidation: updateStatus,
       schema: {
         tags: ["orders"],
         summary: "Marcar pedido confirmado como entregado",
@@ -156,7 +156,7 @@ export const orderRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
   app.post(
     "/stores/:storeId/orders/:orderId/cancel",
     {
-      preHandler: cancelPermission,
+      preValidation: cancelPermission,
       schema: {
         tags: ["orders"],
         summary: "Cancelar pedido y devolver stock",

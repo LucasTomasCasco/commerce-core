@@ -200,15 +200,14 @@ function InviteContent({ token }: { token: string }) {
 
   const preview = useSuspenseQuery({
     queryKey: ["invitation", token],
-    queryFn: () => unwrap(api.GET("/api/v1/invitations/{token}", { params: { path: { token } } })),
+    queryFn: () => unwrap(api.POST("/api/v1/invitations/preview", { body: { token } })),
   });
 
   const accept = useMutation({
     mutationFn: () =>
       unwrap(
-        api.POST("/api/v1/invitations/{token}/accept", {
-          params: { path: { token } },
-          body: preview.data.accountExists ? {} : { fullName, password },
+        api.POST("/api/v1/invitations/accept", {
+          body: preview.data.accountExists ? { token } : { token, fullName, password },
         }),
       ),
     onSuccess: async (result) => {

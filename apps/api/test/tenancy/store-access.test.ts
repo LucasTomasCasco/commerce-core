@@ -140,11 +140,11 @@ describe("acceso a tiendas", () => {
     expect(res.statusCode).toBe(401);
   });
 
-  it("un uuid inválido en la ruta responde 400", async () => {
+  it("un uuid inválido en la ruta responde 404 sin consultar la base", async () => {
     const res = await get("/api/v1/stores/no-es-uuid", ownerToken);
 
-    expect(res.statusCode).toBe(400);
-    expect(res.json()).toMatchObject({ code: "VALIDATION_ERROR" });
+    expect(res.statusCode).toBe(404);
+    expect(res.json()).toMatchObject({ code: "STORE_NOT_FOUND" });
   });
 
   it("una tienda suspendida bloquea a sus miembros", async () => {

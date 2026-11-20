@@ -52,7 +52,7 @@ export const catalogRoutes: FastifyPluginCallbackZod = (app, _options, done) => 
   app.get(
     "/stores/:storeId/categories",
     {
-      preHandler: read,
+      preValidation: read,
       schema: {
         tags: ["catalog"],
         summary: "Categorías de la tienda",
@@ -72,7 +72,7 @@ export const catalogRoutes: FastifyPluginCallbackZod = (app, _options, done) => 
   app.post(
     "/stores/:storeId/categories",
     {
-      preHandler: manageCategories,
+      preValidation: manageCategories,
       schema: {
         tags: ["catalog"],
         summary: "Crear categoría",
@@ -97,7 +97,7 @@ export const catalogRoutes: FastifyPluginCallbackZod = (app, _options, done) => 
   app.patch(
     "/stores/:storeId/categories/:categoryId",
     {
-      preHandler: manageCategories,
+      preValidation: manageCategories,
       schema: {
         tags: ["catalog"],
         summary: "Editar categoría",
@@ -123,7 +123,7 @@ export const catalogRoutes: FastifyPluginCallbackZod = (app, _options, done) => 
   app.delete(
     "/stores/:storeId/categories/:categoryId",
     {
-      preHandler: manageCategories,
+      preValidation: manageCategories,
       schema: {
         tags: ["catalog"],
         summary: "Archivar categoría",
@@ -144,7 +144,7 @@ export const catalogRoutes: FastifyPluginCallbackZod = (app, _options, done) => 
   app.get(
     "/stores/:storeId/products",
     {
-      preHandler: read,
+      preValidation: read,
       schema: {
         tags: ["catalog"],
         summary: "Productos de la tienda con filtros",
@@ -159,7 +159,7 @@ export const catalogRoutes: FastifyPluginCallbackZod = (app, _options, done) => 
   app.post(
     "/stores/:storeId/products",
     {
-      preHandler: manageProducts,
+      preValidation: manageProducts,
       schema: {
         tags: ["catalog"],
         summary: "Crear producto",
@@ -187,7 +187,7 @@ export const catalogRoutes: FastifyPluginCallbackZod = (app, _options, done) => 
   app.get(
     "/stores/:storeId/products/:productId",
     {
-      preHandler: read,
+      preValidation: read,
       schema: {
         tags: ["catalog"],
         summary: "Detalle de producto",
@@ -205,7 +205,7 @@ export const catalogRoutes: FastifyPluginCallbackZod = (app, _options, done) => 
   app.patch(
     "/stores/:storeId/products/:productId",
     {
-      preHandler: manageProducts,
+      preValidation: manageProducts,
       schema: {
         tags: ["catalog"],
         summary: "Editar producto",
@@ -235,7 +235,7 @@ export const catalogRoutes: FastifyPluginCallbackZod = (app, _options, done) => 
   app.delete(
     "/stores/:storeId/products/:productId",
     {
-      preHandler: manageProducts,
+      preValidation: manageProducts,
       schema: {
         tags: ["catalog"],
         summary: "Archivar producto",

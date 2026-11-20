@@ -86,3 +86,12 @@ export const passwordResets = pgTable(
   },
   (t) => [index("password_resets_user_id_idx").on(t.userId)],
 );
+
+// Intentos fallidos de login por email normalizado. Se guarda en base para que el bloqueo valga
+// con varias réplicas. Aplica igual exista o no la cuenta, así no revela qué emails existen.
+export const authFailures = pgTable("auth_failures", {
+  emailKey: text().primaryKey(),
+  failures: integer().notNull().default(0),
+  windowStartedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  lockedUntil: timestamp({ withTimezone: true }),
+});

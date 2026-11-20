@@ -171,6 +171,42 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/auth/logout-all": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Cerrar sesión en todos los dispositivos */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": null;
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/auth/me": {
     parameters: {
       query?: never;
@@ -280,7 +316,7 @@ export interface paths {
         content: {
           "application/json": {
             token: string;
-            password: string;
+            password: string & string;
           };
         };
       };
@@ -1199,6 +1235,97 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/platform/stores/{storeId}/roles": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Roles a los que puede pasar el propietario anterior */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          storeId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": {
+              roles: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+              }[];
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/stores/{storeId}/owner-transfer": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Transferir la propiedad de la tienda a otra persona */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          storeId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            /** Format: email */
+            ownerEmail: string;
+            /** Format: uuid */
+            demoteToRoleId: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": null;
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/platform/currencies": {
     parameters: {
       query?: never;
@@ -1325,24 +1452,30 @@ export interface paths {
     };
     trace?: never;
   };
-  "/api/v1/invitations/{token}": {
+  "/api/v1/invitations/preview": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
+    get?: never;
+    put?: never;
     /** Datos de una invitación pendiente */
-    get: {
+    post: {
       parameters: {
         query?: never;
         header?: never;
-        path: {
-          token: string;
-        };
+        path?: never;
         cookie?: never;
       };
-      requestBody?: never;
+      requestBody: {
+        content: {
+          "application/json": {
+            token: string;
+          };
+        };
+      };
       responses: {
         /** @description Default Response */
         200: {
@@ -1361,15 +1494,13 @@ export interface paths {
         };
       };
     };
-    put?: never;
-    post?: never;
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  "/api/v1/invitations/{token}/accept": {
+  "/api/v1/invitations/accept": {
     parameters: {
       query?: never;
       header?: never;
@@ -1383,16 +1514,15 @@ export interface paths {
       parameters: {
         query?: never;
         header?: never;
-        path: {
-          token: string;
-        };
+        path?: never;
         cookie?: never;
       };
       requestBody: {
         content: {
           "application/json": {
+            token: string;
             fullName?: string;
-            password?: string;
+            password?: string & string;
           };
         };
       };

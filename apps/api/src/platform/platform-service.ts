@@ -6,6 +6,7 @@ import { withDbContext } from "../db/tenant.js";
 import {
   currencies,
   invitations as invitationRows,
+  storeMembers,
   storeRoles,
   stores,
 } from "../db/schema/index.js";
@@ -46,59 +47,54 @@ export function createPlatformService({ db, invitations, team }: PlatformService
     if (taken) throw new AppError(409, "SLUG_TAKEN", "Ya existe una tienda con esa dirección");
 
     const storeId = randomUUID();
-    const { store, token, ownerRoleName } = await withDbContext(
-      db,
-      { storeId, userId: input.actorUserId },
-      async (tx) => {
-        const [store] = await tx
-          .insert(stores)
-          .values({
-            id: storeId,
-            name: input.name,
-            slug: input.slug,
-            currencyCode: input.currencyCode,
-            status: "active",
-          })
-          .returning();
-        if (!store) throw new Error("No se creó la tienda");
+    const store = await withDbContext(db, { storeId, userId: input.actorUserId }, async (tx) => {
+      const [store] = await tx
+        .insert(stores)
+        .values({
+          id: storeId,
+          name: input.name,
+          slug: input.slug,
+          currencyCode: input.currencyCode,
+          status: "active",
+        })
+        .returning();
+      if (!store) throw new Error("No se creó la tienda");
 
-        const roles = await tx
-          .insert(storeRoles)
-          .values(
-            DEFAULT_ROLES.map((role) => ({
-              storeId,
-              name: role.name,
-              permissions: [...role.permissions],
-              isSystem: role.name === OWNER_ROLE_NAME,
-            })),
-          )
-          .returning();
-        const ownerRole = roles.find((r) => r.isSystem);
-        if (!ownerRole) throw new Error("No se creó el rol propietario");
+      const roles = await tx
+        .insert(storeRoles)
+        .values(
+          DEFAULT_ROLES.map((role) => ({
+            storeId,
+            name: role.name,
+            permissions: [...role.permissions],
+            isSystem: role.name === OWNER_ROLE_NAME,
+          })),
+        )
+        .returning();
+      const ownerRole = roles.find((r) => r.isSystem);
+      if (!ownerRole) throw new Error("No se creó el rol propietario");
 
-        const token = await invitations.createInvitation(tx, {
-          storeId,
-          email: input.ownerEmail,
-          roleId: ownerRole.id,
-          createdByUserId: input.actorUserId,
-        });
-        await recordAudit(tx, {
-          storeId,
-          actorUserId: input.actorUserId,
-          action: "store.created",
-          entity: "store",
-          entityId: storeId,
-          metadata: { slug: store.slug, ownerEmail: input.ownerEmail },
-        });
-        return { store, token, ownerRoleName: ownerRole.name };
-      },
-    );
-
-    await invitations.sendInvitationEmail({
-      email: input.ownerEmail,
-      storeName: store.name,
-      roleName: ownerRoleName,
-      token,
+      const token = await invitations.createInvitation(tx, {
+        storeId,
+        email: input.ownerEmail,
+        roleId: ownerRole.id,
+        createdByUserId: input.actorUserId,
+      });
+      await invitations.enqueueInvitationEmail(tx, {
+        email: input.ownerEmail,
+        storeName: store.name,
+        roleName: ownerRole.name,
+        token,
+      });
+      await recordAudit(tx, {
+        storeId,
+        actorUserId: input.actorUserId,
+        action: "store.created",
+        entity: "store",
+        entityId: storeId,
+        metadata: { slug: store.slug, ownerEmail: input.ownerEmail },
+      });
+      return store;
     });
     return store;
   }
@@ -235,7 +231,92 @@ export function createPlatformService({ db, invitations, team }: PlatformService
     });
   }
 
+  // Transfiere la propiedad. Hasta que el nuevo propietario acepta, la tienda conserva su propietario actual.
+  // Al aceptar, el propietario anterior pasa al rol indicado y el nuevo queda como único propietario.
+  async function transferOwnership(input: {
+    actorUserId: string;
+    storeId: string;
+    ownerEmail: string;
+    demoteToRoleId: string;
+  }) {
+    const store = await getStore(input.storeId);
+    await withDbContext(db, { storeId: input.storeId, userId: input.actorUserId }, async (tx) => {
+      const [currentOwner] = await tx
+        .select({ id: storeMembers.id })
+        .from(storeMembers)
+        .where(and(eq(storeMembers.storeId, input.storeId), eq(storeMembers.isOwner, true)))
+        .limit(1);
+      if (!currentOwner) throw new AppError(409, "NO_OWNER", "La tienda no tiene propietario");
+
+      const [demoteRole] = await tx
+        .select()
+        .from(storeRoles)
+        .where(and(eq(storeRoles.storeId, input.storeId), eq(storeRoles.id, input.demoteToRoleId)))
+        .limit(1);
+      if (!demoteRole || demoteRole.isSystem) {
+        throw new AppError(400, "INVALID_ROLE", "El rol para el propietario anterior no es válido");
+      }
+
+      const [ownerRole] = await tx
+        .select()
+        .from(storeRoles)
+        .where(and(eq(storeRoles.storeId, input.storeId), eq(storeRoles.isSystem, true)))
+        .limit(1);
+      if (!ownerRole) throw new Error("La tienda no tiene el rol propietario");
+
+      // Una sola transferencia pendiente a la vez: las invitaciones de propiedad anteriores se revocan.
+      await tx
+        .update(invitationRows)
+        .set({ revokedAt: new Date() })
+        .where(
+          and(
+            eq(invitationRows.storeId, input.storeId),
+            eq(invitationRows.roleId, ownerRole.id),
+            isNull(invitationRows.acceptedAt),
+            isNull(invitationRows.revokedAt),
+          ),
+        );
+
+      const token = await invitations.createInvitation(tx, {
+        storeId: input.storeId,
+        email: input.ownerEmail,
+        roleId: ownerRole.id,
+        createdByUserId: input.actorUserId,
+        replacesMemberId: currentOwner.id,
+        replacementRoleId: demoteRole.id,
+      });
+      await invitations.enqueueInvitationEmail(tx, {
+        email: input.ownerEmail,
+        storeName: store.name,
+        roleName: ownerRole.name,
+        token,
+      });
+      await recordAudit(tx, {
+        storeId: input.storeId,
+        actorUserId: input.actorUserId,
+        action: "owner.transfer_requested",
+        entity: "store",
+        entityId: input.storeId,
+        metadata: { ownerEmail: input.ownerEmail, demoteToRoleId: demoteRole.id },
+      });
+    });
+  }
+
+  // Roles que el administrador puede asignar al propietario anterior (los de sistema no).
+  async function listAssignableRoles(storeId: string) {
+    await getStore(storeId);
+    return withDbContext(db, { storeId }, (tx) =>
+      tx
+        .select({ id: storeRoles.id, name: storeRoles.name })
+        .from(storeRoles)
+        .where(and(eq(storeRoles.storeId, storeId), eq(storeRoles.isSystem, false)))
+        .orderBy(asc(storeRoles.name)),
+    );
+  }
+
   return {
+    transferOwnership,
+    listAssignableRoles,
     resendOwnerInvitation,
     createStore,
     listStores,
