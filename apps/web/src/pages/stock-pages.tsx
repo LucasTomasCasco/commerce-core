@@ -1,3 +1,4 @@
+import { Pager } from "../components/ui.js";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState, type SyntheticEvent } from "react";
 import { api, unwrap } from "../api/client.js";
@@ -15,6 +16,8 @@ import {
 import { useStore } from "../store/store-context.js";
 import { errorText } from "./catalog-pages.js";
 
+const MOVEMENTS_PAGE_SIZE = 20;
+
 const MOVEMENT_LABEL: Record<string, string> = {
   purchase: "Entrada",
   sale: "Venta",
@@ -29,6 +32,7 @@ export function StockPage() {
   const [type, setType] = useState<"purchase" | "adjustment">("purchase");
   const [quantity, setQuantity] = useState("");
   const [reason, setReason] = useState("");
+  const [offset, setOffset] = useState(0);
 
   const products = useSuspenseQuery({
     queryKey: ["products", storeId, "stock-select"],
@@ -44,7 +48,7 @@ export function StockPage() {
     queryFn: () =>
       unwrap(
         api.GET("/api/v1/stores/{storeId}/stock-movements", {
-          params: { path: { storeId }, query: { limit: 50 } },
+          params: { path: { storeId }, query: { limit: MOVEMENTS_PAGE_SIZE, offset } },
         }),
       ),
   });
@@ -104,6 +108,12 @@ export function StockPage() {
         )}
       </div>
 
+      <Pager
+        total={movements.data.total}
+        limit={MOVEMENTS_PAGE_SIZE}
+        offset={offset}
+        onChange={setOffset}
+      />
       {can("stock:adjust") && (
         <Card className="h-fit">
           <h2 className="mb-4 font-semibold">Registrar stock</h2>

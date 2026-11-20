@@ -1,8 +1,14 @@
-import { and, asc, count, eq } from "drizzle-orm";
+import { and, asc, count, desc, eq, isNull } from "drizzle-orm";
 import { recordAudit } from "../audit/record.js";
 import type { Db, Tx } from "../db/client.js";
 import { withDbContext } from "../db/tenant.js";
-import { storeMembers, storeRoles, stores, users } from "../db/schema/index.js";
+import {
+  invitations as invitationRows,
+  storeMembers,
+  storeRoles,
+  stores,
+  users,
+} from "../db/schema/index.js";
 import { AppError } from "../http/errors.js";
 import type { Permission } from "../domain/permissions.js";
 import type { InvitationService } from "./invitation-service.js";
@@ -240,7 +246,103 @@ export function createTeamService({ db, invitations }: TeamServiceDeps) {
     });
   }
 
+  // Invitaciones aún no aceptadas ni revocadas (incluye las vencidas, que se pueden reenviar).
+  async function listInvitations(storeId: string) {
+    return withDbContext(db, { storeId }, (tx) =>
+      tx
+        .select({
+          id: invitationRows.id,
+          email: invitationRows.email,
+          roleName: storeRoles.name,
+          expiresAt: invitationRows.expiresAt,
+          createdAt: invitationRows.createdAt,
+        })
+        .from(invitationRows)
+        .innerJoin(storeRoles, eq(storeRoles.id, invitationRows.roleId))
+        .where(
+          and(
+            eq(invitationRows.storeId, storeId),
+            isNull(invitationRows.acceptedAt),
+            isNull(invitationRows.revokedAt),
+          ),
+        )
+        .orderBy(desc(invitationRows.createdAt)),
+    );
+  }
+
+  async function revokeInvitation(input: {
+    storeId: string;
+    actorUserId: string;
+    invitationId: string;
+  }) {
+    await withDbContext(db, { storeId: input.storeId, userId: input.actorUserId }, async (tx) => {
+      const invitation = await findPendingInvitation(tx, input.storeId, input.invitationId);
+      await tx
+        .update(invitationRows)
+        .set({ revokedAt: new Date() })
+        .where(eq(invitationRows.id, invitation.id));
+      await recordAudit(tx, {
+        storeId: input.storeId,
+        actorUserId: input.actorUserId,
+        action: "invitation.revoked",
+        entity: "invitation",
+        entityId: invitation.id,
+        metadata: { email: invitation.email },
+      });
+    });
+  }
+
+  // Reenviar revoca el enlace anterior y envía uno nuevo: el viejo deja de funcionar.
+  async function resendInvitation(input: {
+    storeId: string;
+    actorUserId: string;
+    invitationId: string;
+  }) {
+    const sent = await withDbContext(
+      db,
+      { storeId: input.storeId, userId: input.actorUserId },
+      async (tx) => {
+        const invitation = await findPendingInvitation(tx, input.storeId, input.invitationId);
+        const [store] = await tx
+          .select({ name: stores.name })
+          .from(stores)
+          .where(eq(stores.id, input.storeId))
+          .limit(1);
+        const [role] = await tx
+          .select({ name: storeRoles.name })
+          .from(storeRoles)
+          .where(eq(storeRoles.id, invitation.roleId))
+          .limit(1);
+        if (!store || !role) throw new Error("La invitación apunta a una tienda o rol inexistente");
+
+        await tx
+          .update(invitationRows)
+          .set({ revokedAt: new Date() })
+          .where(eq(invitationRows.id, invitation.id));
+        const token = await invitations.createInvitation(tx, {
+          storeId: input.storeId,
+          email: invitation.email,
+          roleId: invitation.roleId,
+          createdByUserId: input.actorUserId,
+        });
+        await recordAudit(tx, {
+          storeId: input.storeId,
+          actorUserId: input.actorUserId,
+          action: "invitation.resent",
+          entity: "invitation",
+          entityId: invitation.id,
+          metadata: { email: invitation.email },
+        });
+        return { token, email: invitation.email, storeName: store.name, roleName: role.name };
+      },
+    );
+    await invitations.sendInvitationEmail(sent);
+  }
+
   return {
+    listInvitations,
+    revokeInvitation,
+    resendInvitation,
     listMembers,
     listRoles,
     createRole,
@@ -281,4 +383,26 @@ async function assertNameAvailable(tx: Tx, storeId: string, name: string) {
     .where(and(eq(storeRoles.storeId, storeId), eq(storeRoles.name, name)))
     .limit(1);
   if (existing) throw new AppError(409, "ROLE_NAME_TAKEN", "Ya existe un rol con ese nombre");
+}
+
+async function findPendingInvitation(tx: Tx, storeId: string, invitationId: string) {
+  const [invitation] = await tx
+    .select()
+    .from(invitationRows)
+    .where(
+      and(
+        eq(invitationRows.storeId, storeId),
+        eq(invitationRows.id, invitationId),
+        isNull(invitationRows.acceptedAt),
+        isNull(invitationRows.revokedAt),
+      ),
+    )
+    .limit(1);
+  if (!invitation)
+    throw new AppError(
+      404,
+      "INVITATION_NOT_FOUND",
+      "Invitación no encontrada o ya no está pendiente",
+    );
+  return invitation;
 }

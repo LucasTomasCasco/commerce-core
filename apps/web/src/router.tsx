@@ -15,6 +15,7 @@ import { StockPage } from "./pages/stock-pages.js";
 import { NewOrderPage, OrderDetailPage, OrdersPage } from "./pages/sales-pages.js";
 import { AuditPage, TeamPage } from "./pages/team-pages.js";
 import { StorefrontPage } from "./pages/storefront-page.js";
+import { StorefrontProductPage } from "./pages/storefront-product-page.js";
 import { StoreLayout } from "./store/store-layout.js";
 
 export const router = createBrowserRouter([
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
   { path: "/restablecer", element: <ResetPasswordPage /> },
   { path: "/invitacion", element: <InvitePage /> },
   { path: "/t/:slug", element: <StorefrontPage /> },
+  { path: "/t/:slug/productos/:productId", element: <StorefrontProductPage /> },
   {
     element: (
       <RequireAuth>

@@ -1,3 +1,5 @@
+import { Pager } from "../components/ui.js";
+import { RenameCategory } from "../components/rename-category.js";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState, type SyntheticEvent } from "react";
 import { api, unwrap } from "../api/client.js";
@@ -14,6 +16,8 @@ import {
 } from "../components/ui.js";
 import { formatMoney, parseMoneyToMinor } from "../lib/money.js";
 import { useStore } from "../store/store-context.js";
+
+const PAGE_SIZE = 20;
 
 export function errorText(error: unknown): string {
   return error instanceof Error ? error.message : "Ocurrió un error inesperado";
@@ -51,6 +55,7 @@ export function ProductsPage() {
   const [q, setQ] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [includeArchived, setIncludeArchived] = useState(false);
+  const [offset, setOffset] = useState(0);
   const [editing, setEditing] = useState<Product | null>(null);
 
   const categories = useCategories(storeId);
@@ -62,7 +67,8 @@ export function ProductsPage() {
           params: {
             path: { storeId },
             query: {
-              limit: 100,
+              limit: PAGE_SIZE,
+              offset,
               ...(q ? { q } : {}),
               ...(categoryId ? { categoryId } : {}),
               includeArchived: String(includeArchived),
@@ -105,6 +111,7 @@ export function ProductsPage() {
               value={q}
               onChange={(e) => {
                 setQ(e.target.value);
+                setOffset(0);
               }}
               placeholder="Nombre o SKU"
             />
@@ -114,6 +121,7 @@ export function ProductsPage() {
               value={categoryId}
               onChange={(e) => {
                 setCategoryId(e.target.value);
+                setOffset(0);
               }}
             >
               <option value="">Todas</option>
@@ -130,6 +138,7 @@ export function ProductsPage() {
               checked={includeArchived}
               onChange={(e) => {
                 setIncludeArchived(e.target.checked);
+                setOffset(0);
               }}
             />
             Mostrar archivados
@@ -190,6 +199,7 @@ export function ProductsPage() {
             ))}
           </Table>
         )}
+        <Pager total={products.data.total} limit={PAGE_SIZE} offset={offset} onChange={setOffset} />
         {(archive.error || toggleActive.error) && (
           <Alert>{errorText(archive.error ?? toggleActive.error)}</Alert>
         )}
@@ -408,6 +418,9 @@ export function CategoriesPage() {
                   )}
                 </td>
                 <td className="px-4 py-2.5">
+                  {can("categories:manage") && !c.archivedAt && (
+                    <RenameCategory storeId={storeId} category={c} />
+                  )}
                   {can("categories:manage") && !c.archivedAt && (
                     <Button
                       variant="danger"

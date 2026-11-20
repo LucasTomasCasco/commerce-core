@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { api, unwrap } from "../api/client.js";
 import { Badge, Card, Empty, Field, Input, Select } from "../components/ui.js";
 import { formatMoney } from "../lib/money.js";
@@ -64,7 +64,9 @@ export function StorefrontPage() {
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
           {products.data.items.map((p) => (
             <Card key={p.id} className="flex flex-col gap-2">
-              <p className="font-medium">{p.name}</p>
+              <Link to={`/t/${slug}/productos/${p.id}`} className="font-medium hover:underline">
+                {p.name}
+              </Link>
               {p.description && (
                 <p className="line-clamp-2 text-sm text-slate-500">{p.description}</p>
               )}

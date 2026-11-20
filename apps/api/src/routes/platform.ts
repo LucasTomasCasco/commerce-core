@@ -105,6 +105,26 @@ export const platformRoutes: FastifyPluginCallbackZod = (app, _options, done) =>
       }),
   );
 
+  app.post(
+    "/platform/stores/:storeId/owner-invitation/resend",
+    {
+      preHandler: guard,
+      schema: {
+        tags: ["platform"],
+        summary: "Reenviar la invitación al propietario de una tienda",
+        params: z.object({ storeId: z.uuid() }),
+        response: { 202: z.null() },
+      },
+    },
+    async (request, reply) => {
+      await platform.resendOwnerInvitation({
+        actorUserId: currentAuth(request).user.id,
+        storeId: request.params.storeId,
+      });
+      return reply.code(202).send(null);
+    },
+  );
+
   app.get(
     "/platform/currencies",
     {

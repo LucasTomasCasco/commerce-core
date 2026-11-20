@@ -529,7 +529,41 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /** Invitaciones pendientes */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          storeId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": {
+              invitations: {
+                /** Format: uuid */
+                id: string;
+                /** Format: email */
+                email: string;
+                roleName: string;
+                /** Format: date-time */
+                expiresAt: string;
+                /** Format: date-time */
+                createdAt: string;
+              }[];
+            };
+          };
+        };
+      };
+    };
     put?: never;
     /** Invitar staff por email con un rol */
     post: {
@@ -636,6 +670,84 @@ export interface paths {
         };
       };
     };
+    trace?: never;
+  };
+  "/api/v1/stores/{storeId}/invitations/{invitationId}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Revocar una invitación pendiente */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          storeId: string;
+          invitationId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": null;
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/stores/{storeId}/invitations/{invitationId}/resend": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Reenviar una invitación pendiente (invalida el enlace anterior) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          storeId: string;
+          invitationId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": null;
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/stores/{storeId}/roles": {
@@ -1047,6 +1159,44 @@ export interface paths {
         };
       };
     };
+    trace?: never;
+  };
+  "/api/v1/platform/stores/{storeId}/owner-invitation/resend": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Reenviar la invitación al propietario de una tienda */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          storeId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": null;
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/platform/currencies": {

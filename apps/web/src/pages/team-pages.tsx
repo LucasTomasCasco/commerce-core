@@ -1,3 +1,5 @@
+import { Pager } from "../components/ui.js";
+import { InvitationsSection } from "../components/invitations-section.js";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState, type SyntheticEvent } from "react";
 import { api, unwrap } from "../api/client.js";
@@ -17,6 +19,8 @@ import { useStore } from "../store/store-context.js";
 import { errorText } from "./catalog-pages.js";
 
 // Catálogo de permisos de la API. La validación real la hace el servidor.
+const AUDIT_PAGE_SIZE = 25;
+
 const PERMISSION_LABELS = {
   "products:read": "Ver productos",
   "products:manage": "Administrar productos",
@@ -51,6 +55,7 @@ export function TeamPage() {
   });
   const refresh = () =>
     Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["invitations", storeId] }),
       queryClient.invalidateQueries({ queryKey: ["members", storeId] }),
       queryClient.invalidateQueries({ queryKey: ["roles", storeId] }),
     ]);
@@ -135,6 +140,7 @@ export function TeamPage() {
         )}
       </section>
 
+      <InvitationsSection storeId={storeId} canManage={can("team:manage")} onChange={refresh} />
       {can("team:manage") && <InviteForm storeId={storeId} roles={assignable} onDone={refresh} />}
 
       <section className="grid gap-6 lg:grid-cols-[1fr_360px]">
@@ -368,27 +374,36 @@ function RoleForm({
 
 export function AuditPage() {
   const { storeId } = useStore();
+  const [offset, setOffset] = useState(0);
   const audit = useSuspenseQuery({
-    queryKey: ["audit", storeId],
+    queryKey: ["audit", storeId, offset],
     queryFn: () =>
       unwrap(
         api.GET("/api/v1/stores/{storeId}/audit", {
-          params: { path: { storeId }, query: { limit: 100 } },
+          params: { path: { storeId }, query: { limit: AUDIT_PAGE_SIZE, offset } },
         }),
       ),
   });
   if (audit.data.items.length === 0) return <Empty>Todavía no hay actividad registrada.</Empty>;
 
   return (
-    <Table headers={["Fecha", "Quién", "Acción", "Entidad"]}>
-      {audit.data.items.map((e) => (
-        <tr key={e.id}>
-          <td className="px-4 py-2.5 text-xs text-slate-500">{formatDate(e.createdAt)}</td>
-          <td className="px-4 py-2.5">{e.actorName}</td>
-          <td className="px-4 py-2.5 font-mono text-xs">{e.action}</td>
-          <td className="px-4 py-2.5 text-xs text-slate-500">{e.entity}</td>
-        </tr>
-      ))}
-    </Table>
+    <div className="flex flex-col gap-4">
+      <Table headers={["Fecha", "Quién", "Acción", "Entidad"]}>
+        {audit.data.items.map((e) => (
+          <tr key={e.id}>
+            <td className="px-4 py-2.5 text-xs text-slate-500">{formatDate(e.createdAt)}</td>
+            <td className="px-4 py-2.5">{e.actorName}</td>
+            <td className="px-4 py-2.5 font-mono text-xs">{e.action}</td>
+            <td className="px-4 py-2.5 text-xs text-slate-500">{e.entity}</td>
+          </tr>
+        ))}
+      </Table>
+      <Pager
+        total={audit.data.total}
+        limit={AUDIT_PAGE_SIZE}
+        offset={offset}
+        onChange={setOffset}
+      />
+    </div>
   );
 }

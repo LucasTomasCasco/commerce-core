@@ -63,6 +63,7 @@ export function createInvitationService({
         and(
           eq(invitations.tokenHash, hashToken(token)),
           isNull(invitations.acceptedAt),
+          isNull(invitations.revokedAt),
           gt(invitations.expiresAt, new Date()),
         ),
       )

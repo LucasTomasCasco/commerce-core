@@ -21,8 +21,8 @@ export function createServices({ db, mailer, env }: ServicesDeps) {
   const deps = { db, mailer, sessionTtlDays: env.SESSION_TTL_DAYS, appOrigin: env.APP_ORIGIN };
   const auth = createAuthService(deps);
   const invitations = createInvitationService(deps);
-  const platform = createPlatformService({ db, invitations });
   const team = createTeamService({ db, invitations });
+  const platform = createPlatformService({ db, invitations, team });
   const catalog = createCatalogService({ db });
   const inventory = createInventoryService({ db });
   const orders = createOrderService({ db });

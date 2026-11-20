@@ -1,19 +1,26 @@
 import { randomUUID } from "node:crypto";
-import { and, asc, count, eq } from "drizzle-orm";
+import { and, asc, count, desc, eq, isNull } from "drizzle-orm";
 import { recordAudit } from "../audit/record.js";
 import type { Db } from "../db/client.js";
 import { withDbContext } from "../db/tenant.js";
-import { currencies, storeRoles, stores } from "../db/schema/index.js";
+import {
+  currencies,
+  invitations as invitationRows,
+  storeRoles,
+  stores,
+} from "../db/schema/index.js";
 import { AppError } from "../http/errors.js";
 import { DEFAULT_ROLES, OWNER_ROLE_NAME } from "../domain/permissions.js";
 import type { InvitationService } from "../team/invitation-service.js";
+import type { TeamService } from "../team/team-service.js";
 
 export type PlatformServiceDeps = {
   db: Db;
   invitations: InvitationService;
+  team: TeamService;
 };
 
-export function createPlatformService({ db, invitations }: PlatformServiceDeps) {
+export function createPlatformService({ db, invitations, team }: PlatformServiceDeps) {
   // Crea la tienda con sus roles por defecto y una invitación para el owner, todo en una transacción.
   async function createStore(input: {
     actorUserId: string;
@@ -186,7 +193,50 @@ export function createPlatformService({ db, invitations }: PlatformServiceDeps) 
     return updated;
   }
 
+  // Reenvía la invitación del propietario pendiente (por ejemplo, si el email se perdió).
+  async function resendOwnerInvitation(input: { actorUserId: string; storeId: string }) {
+    await getStore(input.storeId);
+    const [pending] = await withDbContext(
+      db,
+      { storeId: input.storeId, userId: input.actorUserId },
+      (tx) =>
+        tx
+          .select({ id: invitationRows.id })
+          .from(invitationRows)
+          .innerJoin(
+            storeRoles,
+            and(
+              eq(storeRoles.storeId, invitationRows.storeId),
+              eq(storeRoles.id, invitationRows.roleId),
+            ),
+          )
+          .where(
+            and(
+              eq(invitationRows.storeId, input.storeId),
+              eq(storeRoles.isSystem, true),
+              isNull(invitationRows.acceptedAt),
+              isNull(invitationRows.revokedAt),
+            ),
+          )
+          .orderBy(desc(invitationRows.createdAt))
+          .limit(1),
+    );
+    if (!pending) {
+      throw new AppError(
+        409,
+        "NO_PENDING_OWNER_INVITATION",
+        "El propietario ya aceptó la invitación",
+      );
+    }
+    await team.resendInvitation({
+      storeId: input.storeId,
+      actorUserId: input.actorUserId,
+      invitationId: pending.id,
+    });
+  }
+
   return {
+    resendOwnerInvitation,
     createStore,
     listStores,
     getStore,

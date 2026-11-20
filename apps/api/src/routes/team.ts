@@ -20,6 +20,14 @@ const memberSchema = z.object({
   createdAt: z.date(),
 });
 
+const invitationSchema = z.object({
+  id: z.uuid(),
+  email: z.email(),
+  roleName: z.string(),
+  expiresAt: z.coerce.date(),
+  createdAt: z.coerce.date(),
+});
+
 const roleSchema = z.object({
   id: z.uuid(),
   name: z.string(),
@@ -110,6 +118,62 @@ export const teamRoutes: FastifyPluginCallbackZod = (app, _options, done) => {
         actorUserId: currentAuth(request).user.id,
       });
       return reply.code(204).send(null);
+    },
+  );
+
+  app.get(
+    "/stores/:storeId/invitations",
+    {
+      preHandler: guard,
+      schema: {
+        tags: ["team"],
+        summary: "Invitaciones pendientes",
+        params: uuidParam,
+        response: { 200: z.object({ invitations: z.array(invitationSchema) }) },
+      },
+    },
+    async (request) => ({ invitations: await team.listInvitations(request.params.storeId) }),
+  );
+
+  app.delete(
+    "/stores/:storeId/invitations/:invitationId",
+    {
+      preHandler: guard,
+      schema: {
+        tags: ["team"],
+        summary: "Revocar una invitación pendiente",
+        params: z.object({ storeId: z.uuid(), invitationId: z.uuid() }),
+        response: { 204: z.null() },
+      },
+    },
+    async (request, reply) => {
+      await team.revokeInvitation({
+        storeId: request.params.storeId,
+        invitationId: request.params.invitationId,
+        actorUserId: currentAuth(request).user.id,
+      });
+      return reply.code(204).send(null);
+    },
+  );
+
+  app.post(
+    "/stores/:storeId/invitations/:invitationId/resend",
+    {
+      preHandler: guard,
+      schema: {
+        tags: ["team"],
+        summary: "Reenviar una invitación pendiente (invalida el enlace anterior)",
+        params: z.object({ storeId: z.uuid(), invitationId: z.uuid() }),
+        response: { 202: z.null() },
+      },
+    },
+    async (request, reply) => {
+      await team.resendInvitation({
+        storeId: request.params.storeId,
+        invitationId: request.params.invitationId,
+        actorUserId: currentAuth(request).user.id,
+      });
+      return reply.code(202).send(null);
     },
   );
 

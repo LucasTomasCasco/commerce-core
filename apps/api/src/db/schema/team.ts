@@ -72,6 +72,7 @@ export const invitations = pgTable(
     tokenHash: text().notNull().unique(),
     expiresAt: timestamp({ withTimezone: true }).notNull(),
     acceptedAt: timestamp({ withTimezone: true }),
+    revokedAt: timestamp({ withTimezone: true }),
     createdByUserId: uuid()
       .notNull()
       .references(() => users.id),

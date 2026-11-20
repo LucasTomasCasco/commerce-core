@@ -1,3 +1,5 @@
+import { Pager } from "../components/ui.js";
+import { PlatformStoreSettings } from "./store-settings.js";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState, type SyntheticEvent } from "react";
 import { Link, useParams } from "react-router";
@@ -18,6 +20,8 @@ import {
 } from "../components/ui.js";
 import { errorText } from "./catalog-pages.js";
 
+const STORES_PAGE_SIZE = 20;
+
 export function StoresAdminPage() {
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
@@ -25,10 +29,15 @@ export function StoresAdminPage() {
   const [currencyCode, setCurrencyCode] = useState("ARS");
   const [ownerEmail, setOwnerEmail] = useState("");
 
+  const [offset, setOffset] = useState(0);
   const stores = useSuspenseQuery({
-    queryKey: ["platform-stores"],
+    queryKey: ["platform-stores", offset],
     queryFn: () =>
-      unwrap(api.GET("/api/v1/platform/stores", { params: { query: { limit: 100 } } })),
+      unwrap(
+        api.GET("/api/v1/platform/stores", {
+          params: { query: { limit: STORES_PAGE_SIZE, offset } },
+        }),
+      ),
   });
   const currencies = useSuspenseQuery({
     queryKey: ["platform-currencies"],
@@ -74,6 +83,14 @@ export function StoresAdminPage() {
             ))}
           </Table>
         )}
+        <div className="flex flex-col gap-4">
+          <Pager
+            total={stores.data.total}
+            limit={STORES_PAGE_SIZE}
+            offset={offset}
+            onChange={setOffset}
+          />
+        </div>
         <Card className="h-fit">
           <h2 className="mb-4 font-semibold">Nueva tienda</h2>
           <form
@@ -227,6 +244,9 @@ export function PlatformStorePage() {
           )}
           {setStatus.error && <Alert>{errorText(setStatus.error)}</Alert>}
         </Card>
+      </div>
+      <div className="mt-8">
+        <PlatformStoreSettings storeId={storeId} currentName={s.name} />
       </div>
       <section className="mt-8 flex flex-col gap-3">
         <h2 className="font-semibold">Auditoría reciente</h2>

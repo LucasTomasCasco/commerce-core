@@ -1,3 +1,4 @@
+import { Pager } from "../components/ui.js";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState, type SyntheticEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router";
@@ -19,6 +20,8 @@ import {
 import { formatMoney } from "../lib/money.js";
 import { useStore } from "../store/store-context.js";
 import { errorText } from "./catalog-pages.js";
+
+const ORDERS_PAGE_SIZE = 20;
 
 type OrderStatus = "pending" | "confirmed" | "fulfilled" | "cancelled";
 
@@ -43,6 +46,7 @@ export function OrderStatusBadge({ status }: { status: string }) {
 export function OrdersPage() {
   const { storeId, store, can } = useStore();
   const [status, setStatus] = useState("");
+  const [offset, setOffset] = useState(0);
   const orders = useSuspenseQuery({
     queryKey: ["orders", storeId, status],
     queryFn: () =>
@@ -50,7 +54,11 @@ export function OrdersPage() {
         api.GET("/api/v1/stores/{storeId}/orders", {
           params: {
             path: { storeId },
-            query: { limit: 50, ...(status ? { status: status as OrderStatus } : {}) },
+            query: {
+              limit: ORDERS_PAGE_SIZE,
+              offset,
+              ...(status ? { status: status as OrderStatus } : {}),
+            },
           },
         }),
       ),
@@ -64,6 +72,7 @@ export function OrdersPage() {
             value={status}
             onChange={(e) => {
               setStatus(e.target.value);
+              setOffset(0);
             }}
           >
             <option value="">Todos</option>
@@ -103,6 +112,12 @@ export function OrdersPage() {
           ))}
         </Table>
       )}
+      <Pager
+        total={orders.data.total}
+        limit={ORDERS_PAGE_SIZE}
+        offset={offset}
+        onChange={setOffset}
+      />
     </div>
   );
 }

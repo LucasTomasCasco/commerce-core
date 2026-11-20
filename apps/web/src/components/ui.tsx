@@ -185,3 +185,45 @@ export function Boundary({ children }: { children: ReactNode }) {
     </ErrorBoundary>
   );
 }
+
+// Paginación de listas con total, límite y offset (los mismos campos que devuelve la API).
+export function Pager({
+  total,
+  limit,
+  offset,
+  onChange,
+}: {
+  total: number;
+  limit: number;
+  offset: number;
+  onChange: (offset: number) => void;
+}) {
+  if (total <= limit) return null;
+  const page = Math.floor(offset / limit) + 1;
+  const pages = Math.ceil(total / limit);
+  return (
+    <div className="flex items-center justify-end gap-3 text-sm text-slate-600">
+      <Button
+        variant="secondary"
+        disabled={offset === 0}
+        onClick={() => {
+          onChange(Math.max(0, offset - limit));
+        }}
+      >
+        Anterior
+      </Button>
+      <span>
+        Página {page} de {pages}
+      </span>
+      <Button
+        variant="secondary"
+        disabled={offset + limit >= total}
+        onClick={() => {
+          onChange(offset + limit);
+        }}
+      >
+        Siguiente
+      </Button>
+    </div>
+  );
+}
