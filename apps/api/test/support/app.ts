@@ -41,7 +41,8 @@ export async function buildTestApp(options: TestAppOptions = {}) {
   const originalInject = app.inject.bind(app);
   app.inject = ((request: unknown) =>
     originalInject(request as never).then(async (res) => {
-      await processOutbox(db, mailer);
+      // Un 'ahora' algo futuro: en tests no se respeta el backoff y ningún email queda sin enviar por diferencias de reloj.
+      await processOutbox(db, mailer, { now: new Date(Date.now() + 60 * 60 * 1000) });
       return res;
     })) as unknown as typeof app.inject;
 
