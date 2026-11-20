@@ -19,6 +19,7 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/01-roles.sql:/docker-entrypoint-initdb.d/01-roles.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U commerce -d commerce_core"]
       interval: 5s
@@ -35,7 +36,7 @@ services:
     <<: *api-image
     command: ["node", "dist/db/migrate-cli.js"]
     environment:
-      DATABASE_URL: postgres://commerce:commerce@postgres:5432/commerce_core
+      DATABASE_URL: postgres://commerce_api:commerce_api@postgres:5432/commerce_core
     depends_on:
       postgres:
         condition: service_healthy
@@ -44,7 +45,7 @@ services:
     <<: *api-image
     command: ["node", "dist/db/seed-cli.js"]
     environment:
-      DATABASE_URL: postgres://commerce:commerce@postgres:5432/commerce_core
+      DATABASE_URL: postgres://commerce_api:commerce_api@postgres:5432/commerce_core
       PLATFORM_ADMIN_EMAIL: ${PLATFORM_ADMIN_EMAIL:-admin@commerce-core.local}
       PLATFORM_ADMIN_PASSWORD: ${PLATFORM_ADMIN_PASSWORD:?Definir PLATFORM_ADMIN_PASSWORD en .env}
     depends_on:
@@ -56,11 +57,12 @@ services:
     environment:
       PORT: 3000
       LOG_LEVEL: info
-      DATABASE_URL: postgres://commerce:commerce@postgres:5432/commerce_core
+      DATABASE_URL: postgres://commerce_api:commerce_api@postgres:5432/commerce_core
       APP_ORIGIN: http://localhost:${WEB_PORT:-8090}
       SMTP_URL: smtp://mailpit:1025
       # nginx es el único proxy delante de la API: su X-Forwarded-For es confiable (un salto).
       TRUST_PROXY: 1
+      AUTH_RATE_LIMIT_MAX: ${AUTH_RATE_LIMIT_MAX:-10}
     depends_on:
       api-seed:
         condition: service_completed_successfully

@@ -63,6 +63,25 @@ docker compose up -d --build
 
 El administrador general se crea con `PLATFORM_ADMIN_EMAIL` y `PLATFORM_ADMIN_PASSWORD` del `.env`.
 
+## Roles de base de datos
+
+- `commerce` (superusuario): solo administra la instancia.
+- `commerce_api`: rol con el que corren la API y las migraciones. No es superusuario y no salta RLS. Es dueño de la base y de sus tablas.
+- `commerce_app`: rol sin login. La API lo asume en cada transacción de tienda (`SET LOCAL ROLE`), así las políticas RLS siempre se aplican.
+
+`infra/postgres/01-roles.sql` crea los roles en un volumen nuevo. En un volumen existente hay que aplicarlo a mano y reasignar la propiedad de las tablas (ver ADR 0005). En producción la API no arranca si su rol es superusuario o tiene BYPASSRLS.
+
+## Variables de seguridad
+
+| Variable                      | Default | Qué controla                                                    |
+| ----------------------------- | ------- | --------------------------------------------------------------- |
+| `TRUST_PROXY`                 | `0`     | Saltos de proxy de confianza para la IP del cliente (nginx = 1) |
+| `LOGIN_MAX_FAILURES`          | `5`     | Intentos fallidos antes de bloquear el email                    |
+| `LOGIN_LOCK_MINUTES`          | `15`    | Duración del bloqueo                                            |
+| `ORDER_PENDING_TTL_HOURS`     | `48`    | Pedidos pendientes que se cancelan solos y devuelven stock      |
+| `IDEMPOTENCY_RETENTION_HOURS` | `24`    | Retención de claves de `Idempotency-Key`                        |
+| `JOB_INTERVAL_SECONDS`        | `5`     | Frecuencia del worker (emails, expiración, limpieza)            |
+
 ## Datos de demo
 
 `db:seed` crea monedas, el administrador general y la tienda **Casa Roble** (ficticia) con su propietaria `lucia@casa-roble.example`.
@@ -87,6 +106,9 @@ Para el E2E: `pnpm e2e` levanta la API y la web si no están corriendo. Contra u
 - [ADR 0001: Aislamiento por tienda con RLS](docs/adr/0001-tenancy-rls.md)
 - [ADR 0002: Sesiones opacas en lugar de JWT](docs/adr/0002-sesiones-opacas.md)
 - [ADR 0003: Stock como ledger y descuento al crear el pedido](docs/adr/0003-stock-ledger.md)
+- [ADR 0004: Emails por outbox transaccional](docs/adr/0004-outbox-emails.md)
+- [ADR 0005: Decisiones de seguridad](docs/adr/0005-seguridad.md)
+- [ADR 0006: Decisiones de negocio](docs/adr/0006-negocio.md)
 
 ## Fuera de v1
 
