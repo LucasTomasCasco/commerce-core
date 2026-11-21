@@ -30,14 +30,17 @@ function MyStores() {
         <div className="grid gap-4 sm:grid-cols-2">
           {stores.data.stores.map((store) => (
             <Link key={store.id} to={`/tiendas/${store.id}`}>
-              <Card className="transition hover:border-slate-400">
+              <Card className="transition hover:border-fg-muted">
+                <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-[#ff7a1a] text-base font-extrabold text-accent-fg">
+                  {store.name.charAt(0).toUpperCase()}
+                </div>
                 <div className="flex items-center justify-between gap-2">
-                  <p className="font-semibold">{store.name}</p>
+                  <p className="text-lg font-bold">{store.name}</p>
                   <Badge tone={store.status === "active" ? "good" : "bad"}>
                     {store.status === "active" ? "Activa" : "Suspendida"}
                   </Badge>
                 </div>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-fg-muted">
                   {store.access.roleName}
                   {store.access.isOwner ? " · Propietario" : ""}
                 </p>

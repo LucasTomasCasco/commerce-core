@@ -92,19 +92,16 @@ export function OrdersPage() {
       ) : (
         <Table headers={["Código", "Cliente", "Estado", "Total", "Fecha", ""]}>
           {orders.data.items.map((o) => (
-            <tr key={o.id} className="hover:bg-slate-50">
+            <tr key={o.id} className="hover:bg-surface-2">
               <td className="px-4 py-2.5 font-mono text-xs">{o.code}</td>
               <td className="px-4 py-2.5">{o.customerName}</td>
               <td className="px-4 py-2.5">
                 <OrderStatusBadge status={o.status} />
               </td>
               <td className="px-4 py-2.5">{formatMoney(o.totalMinor, store.currencyCode)}</td>
-              <td className="px-4 py-2.5 text-xs text-slate-500">{formatDate(o.createdAt)}</td>
+              <td className="px-4 py-2.5 text-xs text-fg-muted">{formatDate(o.createdAt)}</td>
               <td className="px-4 py-2.5">
-                <Link
-                  className="text-slate-700 underline"
-                  to={`/tiendas/${storeId}/pedidos/${o.id}`}
-                >
+                <Link className="text-fg underline" to={`/tiendas/${storeId}/pedidos/${o.id}`}>
                   Ver
                 </Link>
               </td>
@@ -212,7 +209,7 @@ export function NewOrderPage() {
             />
           </Field>
           <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium text-slate-700">Productos</p>
+            <p className="text-sm font-medium text-fg">Productos</p>
             {lines.map((line, index) => (
               <div key={index} className="flex gap-2">
                 <Select
@@ -243,6 +240,7 @@ export function NewOrderPage() {
                 />
                 {lines.length > 1 && (
                   <Button
+                    size="sm"
                     type="button"
                     variant="secondary"
                     onClick={() => {
@@ -256,6 +254,7 @@ export function NewOrderPage() {
             ))}
             <div>
               <Button
+                size="sm"
                 type="button"
                 variant="secondary"
                 onClick={() => {
@@ -268,7 +267,7 @@ export function NewOrderPage() {
           </div>
         </Card>
         <Card className="flex h-fit flex-col gap-4">
-          <p className="text-sm text-slate-500">Total</p>
+          <p className="text-sm text-fg-muted">Total</p>
           <p className="text-2xl font-semibold">{formatMoney(total, store.currencyCode)}</p>
           {create.error && <Alert>{errorText(create.error)}</Alert>}
           <Button type="submit" disabled={create.isPending}>
@@ -325,13 +324,13 @@ export function OrderDetailPage() {
           <OrderStatusBadge status={o.status} />
         </div>
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-          <dt className="text-slate-500">Cliente</dt>
+          <dt className="text-fg-muted">Cliente</dt>
           <dd>{o.customerName}</dd>
-          <dt className="text-slate-500">Teléfono</dt>
+          <dt className="text-fg-muted">Teléfono</dt>
           <dd>{o.customerPhone}</dd>
-          <dt className="text-slate-500">Nota</dt>
+          <dt className="text-fg-muted">Nota</dt>
           <dd>{o.note ?? "—"}</dd>
-          <dt className="text-slate-500">Creado</dt>
+          <dt className="text-fg-muted">Creado</dt>
           <dd>{formatDate(o.createdAt)}</dd>
         </dl>
         <Table headers={["Producto", "Precio", "Cant.", "Subtotal"]}>
@@ -339,7 +338,7 @@ export function OrderDetailPage() {
             <tr key={item.id}>
               <td className="px-4 py-2.5">
                 {item.nameSnapshot}{" "}
-                <span className="font-mono text-xs text-slate-500">{item.skuSnapshot}</span>
+                <span className="font-mono text-xs text-fg-muted">{item.skuSnapshot}</span>
               </td>
               <td className="px-4 py-2.5">
                 {formatMoney(item.unitPriceMinor, store.currencyCode)}
@@ -377,6 +376,7 @@ export function OrderDetailPage() {
         )}
         {canCancel && (
           <Button
+            size="sm"
             variant="danger"
             onClick={() => {
               transition.mutate("cancel");
@@ -386,10 +386,10 @@ export function OrderDetailPage() {
           </Button>
         )}
         {!canConfirm && !canFulfill && !canCancel && (
-          <p className="text-sm text-slate-500">Sin acciones disponibles.</p>
+          <p className="text-sm text-fg-muted">Sin acciones disponibles.</p>
         )}
         {transition.error && <Alert>{errorText(transition.error)}</Alert>}
-        <Link to={`/tiendas/${storeId}/pedidos`} className="mt-2 text-sm text-slate-600 underline">
+        <Link to={`/tiendas/${storeId}/pedidos`} className="mt-2 text-sm text-fg-muted underline">
           Volver a pedidos
         </Link>
       </Card>

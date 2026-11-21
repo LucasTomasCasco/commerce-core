@@ -103,7 +103,7 @@ export function ProductsPage() {
     categories.data.categories.find((c) => c.id === id)?.name ?? "—";
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+    <div className="grid gap-6 2xl:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-end gap-3">
           <Field label="Buscar">
@@ -150,7 +150,7 @@ export function ProductsPage() {
         ) : (
           <Table headers={["SKU", "Producto", "Categoría", "Precio", "Stock", "Estado", ""]}>
             {products.data.items.map((p) => (
-              <tr key={p.id} className="hover:bg-slate-50">
+              <tr key={p.id} className="hover:bg-surface-2">
                 <td className="px-4 py-2.5 font-mono text-xs">{p.sku}</td>
                 <td className="px-4 py-2.5">{p.name}</td>
                 <td className="px-4 py-2.5">{categoryName(p.categoryId)}</td>
@@ -169,6 +169,7 @@ export function ProductsPage() {
                   {can("products:manage") && !p.archivedAt && (
                     <>
                       <Button
+                        size="sm"
                         variant="secondary"
                         onClick={() => {
                           setEditing(p);
@@ -177,6 +178,7 @@ export function ProductsPage() {
                         Editar
                       </Button>
                       <Button
+                        size="sm"
                         variant="secondary"
                         onClick={() => {
                           toggleActive.mutate(p);
@@ -185,6 +187,7 @@ export function ProductsPage() {
                         {p.active ? "Desactivar" : "Activar"}
                       </Button>
                       <Button
+                        size="sm"
                         variant="danger"
                         onClick={() => {
                           archive.mutate(p.id);
@@ -346,7 +349,7 @@ function ProductForm({
             {product ? "Guardar cambios" : "Crear producto"}
           </Button>
           {product && (
-            <Button type="button" variant="secondary" onClick={onCancel}>
+            <Button size="sm" type="button" variant="secondary" onClick={onCancel}>
               Cancelar
             </Button>
           )}
@@ -390,7 +393,7 @@ export function CategoriesPage() {
   });
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="flex flex-col gap-4">
         <label className="flex items-center gap-2 text-sm">
           <input
@@ -423,6 +426,7 @@ export function CategoriesPage() {
                   )}
                   {can("categories:manage") && !c.archivedAt && (
                     <Button
+                      size="sm"
                       variant="danger"
                       onClick={() => {
                         archive.mutate(c.id);

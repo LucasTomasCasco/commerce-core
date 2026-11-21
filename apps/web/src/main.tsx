@@ -5,6 +5,7 @@ import { RouterProvider } from "react-router";
 import "./index.css";
 import { ApiError } from "./api/client.js";
 import { router } from "./router.js";
+import { ThemeProvider } from "./theme.js";
 
 // Los errores 4xx son definitivos (permiso, validación, no encontrado): no se reintentan.
 const queryClient = new QueryClient({
@@ -25,8 +26,10 @@ if (!container) {
 
 createRoot(container).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </ThemeProvider>
   </StrictMode>,
 );

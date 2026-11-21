@@ -12,15 +12,15 @@ export function StoreOverviewPage() {
       <Card>
         <h2 className="mb-3 font-semibold">Tienda</h2>
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-          <dt className="text-slate-500">Dirección pública</dt>
+          <dt className="text-fg-muted">Dirección pública</dt>
           <dd>
             <a className="underline" href={`/t/${store.slug}`} target="_blank" rel="noreferrer">
               /t/{store.slug}
             </a>
           </dd>
-          <dt className="text-slate-500">Moneda</dt>
+          <dt className="text-fg-muted">Moneda</dt>
           <dd>{store.currencyCode}</dd>
-          <dt className="text-slate-500">Estado</dt>
+          <dt className="text-fg-muted">Estado</dt>
           <dd>{store.status}</dd>
         </dl>
       </Card>
@@ -30,7 +30,7 @@ export function StoreOverviewPage() {
           Rol: <strong>{roleName}</strong>
           {isOwner ? " (propietario)" : ""}
         </p>
-        <p className="mt-2 text-xs text-slate-500">{permissions.length} permisos</p>
+        <p className="mt-2 text-xs text-fg-muted">{permissions.length} permisos</p>
       </Card>
       {can("store:settings") && <StoreSettingsForm storeId={storeId} currentName={store.name} />}
     </div>

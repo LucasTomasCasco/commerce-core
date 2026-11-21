@@ -119,10 +119,11 @@ export function TeamPage() {
                   </Select>
                 )}
               </td>
-              <td className="px-4 py-2.5 text-xs text-slate-500">{formatDate(m.createdAt)}</td>
+              <td className="px-4 py-2.5 text-xs text-fg-muted">{formatDate(m.createdAt)}</td>
               <td className="px-4 py-2.5">
                 {!m.isOwner && can("team:manage") && (
                   <Button
+                    size="sm"
                     variant="danger"
                     onClick={() => {
                       removeMember.mutate(m.id);
@@ -155,7 +156,7 @@ export function TeamPage() {
                   <td className="px-4 py-2.5 font-medium">
                     {r.name} {r.isSystem && <Badge>Sistema</Badge>}
                   </td>
-                  <td className="px-4 py-2.5 text-xs text-slate-600">
+                  <td className="px-4 py-2.5 text-xs text-fg-muted">
                     {r.isSystem
                       ? "Todos los permisos"
                       : r.permissions.map((p) => PERMISSION_LABELS[p]).join(" · ")}
@@ -163,6 +164,7 @@ export function TeamPage() {
                   <td className="px-4 py-2.5">
                     {!r.isSystem && can("team:manage") && (
                       <Button
+                        size="sm"
                         variant="danger"
                         onClick={() => {
                           deleteRole.mutate(r.id);
@@ -349,7 +351,7 @@ function RoleForm({
           />
         </Field>
         <fieldset className="flex flex-col gap-1.5">
-          <legend className="mb-1 text-sm font-medium text-slate-700">Permisos</legend>
+          <legend className="mb-1 text-sm font-medium text-fg">Permisos</legend>
           {(Object.entries(PERMISSION_LABELS) as [Permission, string][]).map(([key, label]) => (
             <label key={key} className="flex items-center gap-2 text-sm">
               <input
@@ -391,10 +393,10 @@ export function AuditPage() {
       <Table headers={["Fecha", "Quién", "Acción", "Entidad"]}>
         {audit.data.items.map((e) => (
           <tr key={e.id}>
-            <td className="px-4 py-2.5 text-xs text-slate-500">{formatDate(e.createdAt)}</td>
+            <td className="px-4 py-2.5 text-xs text-fg-muted">{formatDate(e.createdAt)}</td>
             <td className="px-4 py-2.5">{e.actorName}</td>
             <td className="px-4 py-2.5 font-mono text-xs">{e.action}</td>
-            <td className="px-4 py-2.5 text-xs text-slate-500">{e.entity}</td>
+            <td className="px-4 py-2.5 text-xs text-fg-muted">{e.entity}</td>
           </tr>
         ))}
       </Table>

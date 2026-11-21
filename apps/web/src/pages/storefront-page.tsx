@@ -2,11 +2,26 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
 import { api, unwrap } from "../api/client.js";
-import { Badge, Card, Empty, Field, Input, Select } from "../components/ui.js";
+import { Badge, Boundary, Empty, Input } from "../components/ui.js";
+import { ThemeToggle } from "../components/theme-toggle.js";
 import { formatMoney } from "../lib/money.js";
+import { initials, productArt } from "../lib/product-art.js";
 
 // Vista pública de la tienda: sin sesión, solo productos activos y disponibilidad (sin cantidades).
 export function StorefrontPage() {
+  return (
+    <div className="mx-auto max-w-6xl px-5 py-10">
+      <div className="mb-10 flex justify-end">
+        <ThemeToggle />
+      </div>
+      <Boundary>
+        <Catalog />
+      </Boundary>
+    </div>
+  );
+}
+
+function Catalog() {
   const { slug = "" } = useParams();
   const [q, setQ] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -30,56 +45,113 @@ export function StorefrontPage() {
   });
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-semibold tracking-tight">Catálogo</h1>
-      <div className="mb-6 flex flex-wrap gap-3">
-        <Field label="Buscar">
+    <>
+      <header className="mb-12 max-w-2xl">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+          Catálogo
+        </p>
+        <h1 className="text-5xl font-extrabold leading-[1.05] tracking-tight">
+          Lo que tenemos{" "}
+          <span className="bg-gradient-to-r from-accent to-[#ff7a1a] bg-clip-text text-transparent">
+            hoy
+          </span>
+        </h1>
+        <p className="mt-4 text-fg-muted">Precios actualizados y disponibilidad en tiempo real.</p>
+      </header>
+
+      <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-wrap gap-2">
+          <Chip
+            active={categoryId === ""}
+            onClick={() => {
+              setCategoryId("");
+            }}
+          >
+            Todo
+          </Chip>
+          {categories.data.categories.map((c) => (
+            <Chip
+              key={c.id}
+              active={categoryId === c.id}
+              onClick={() => {
+                setCategoryId(c.id);
+              }}
+            >
+              {c.name}
+            </Chip>
+          ))}
+        </div>
+        <div className="md:w-72">
           <Input
+            type="search"
+            aria-label="Buscar productos"
             value={q}
             onChange={(e) => {
               setQ(e.target.value);
             }}
-            placeholder="Qué estás buscando"
+            placeholder="Buscar por nombre o SKU"
+            className="w-full"
           />
-        </Field>
-        <Field label="Categoría">
-          <Select
-            value={categoryId}
-            onChange={(e) => {
-              setCategoryId(e.target.value);
-            }}
-          >
-            <option value="">Todas</option>
-            {categories.data.categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </Select>
-        </Field>
+        </div>
       </div>
+
       {products.data.items.length === 0 ? (
-        <Empty>No encontramos productos.</Empty>
+        <Empty>No encontramos productos con esos filtros.</Empty>
       ) : (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
           {products.data.items.map((p) => (
-            <Card key={p.id} className="flex flex-col gap-2">
-              <Link to={`/t/${slug}/productos/${p.id}`} className="font-medium hover:underline">
-                {p.name}
-              </Link>
-              {p.description && (
-                <p className="line-clamp-2 text-sm text-slate-500">{p.description}</p>
-              )}
-              <div className="mt-auto flex items-center justify-between pt-2">
-                <p className="font-semibold">{formatMoney(p.priceMinor, p.currencyCode)}</p>
-                <Badge tone={p.inStock ? "good" : "bad"}>
-                  {p.inStock ? "Disponible" : "Sin stock"}
-                </Badge>
+            <Link
+              key={p.id}
+              to={`/t/${slug}/productos/${p.id}`}
+              className="group flex flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-card transition duration-200 hover:-translate-y-1 hover:border-fg-muted/40"
+            >
+              <div
+                className="relative flex aspect-[4/3] items-center justify-center"
+                style={{ background: productArt(p.name) }}
+              >
+                <span className="text-4xl font-extrabold text-white/90 drop-shadow-sm transition group-hover:scale-110">
+                  {initials(p.name)}
+                </span>
               </div>
-            </Card>
+              <div className="flex flex-1 flex-col gap-2 p-4">
+                <p className="line-clamp-2 font-semibold leading-snug">{p.name}</p>
+                <div className="mt-auto flex items-end justify-between gap-2 pt-2">
+                  <p className="num text-lg font-bold">
+                    {formatMoney(p.priceMinor, p.currencyCode)}
+                  </p>
+                  <Badge tone={p.inStock ? "good" : "bad"}>
+                    {p.inStock ? "Disponible" : "Agotado"}
+                  </Badge>
+                </div>
+              </div>
+            </Link>
           ))}
         </div>
       )}
-    </div>
+    </>
+  );
+}
+
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
+        active
+          ? "border-accent bg-accent text-accent-fg"
+          : "border-line bg-surface text-fg-muted hover:border-fg-muted hover:text-fg"
+      }`}
+    >
+      {children}
+    </button>
   );
 }

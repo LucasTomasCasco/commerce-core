@@ -60,7 +60,7 @@ export function StoresAdminPage() {
   return (
     <>
       <PageHeader title="Tiendas" />
-      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         {stores.data.items.length === 0 ? (
           <Empty>Todavía no hay tiendas.</Empty>
         ) : (
@@ -202,17 +202,17 @@ export function PlatformStorePage() {
       <PageHeader title={s.name}>
         <LinkButton to="/admin/tiendas">Volver</LinkButton>
       </PageHeader>
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <Card className="flex flex-col gap-4">
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-            <dt className="text-slate-500">Dirección</dt>
+            <dt className="text-fg-muted">Dirección</dt>
             <dd>/{s.slug}</dd>
-            <dt className="text-slate-500">Moneda</dt>
+            <dt className="text-fg-muted">Moneda</dt>
             <dd>{s.currencyCode}</dd>
-            <dt className="text-slate-500">Creada</dt>
+            <dt className="text-fg-muted">Creada</dt>
             <dd>{formatDate(s.createdAt)}</dd>
           </dl>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-fg-muted">
             El administrador general no ve productos ni pedidos de la tienda; solo gestiona su
             estado y su auditoría.
           </p>
@@ -226,6 +226,7 @@ export function PlatformStorePage() {
           </p>
           {s.status === "active" ? (
             <Button
+              size="sm"
               variant="danger"
               onClick={() => {
                 setStatus.mutate("suspended");
@@ -261,7 +262,7 @@ export function PlatformStorePage() {
           <Table headers={["Fecha", "Quién", "Acción"]}>
             {audit.data.items.map((e) => (
               <tr key={e.id}>
-                <td className="px-4 py-2.5 text-xs text-slate-500">{formatDate(e.createdAt)}</td>
+                <td className="px-4 py-2.5 text-xs text-fg-muted">{formatDate(e.createdAt)}</td>
                 <td className="px-4 py-2.5">{e.actorName}</td>
                 <td className="px-4 py-2.5 font-mono text-xs">{e.action}</td>
               </tr>
@@ -316,7 +317,7 @@ export function CurrenciesPage() {
   return (
     <>
       <PageHeader title="Monedas" />
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         {
           <Table headers={["Código", "Nombre", "Decimales", "Estado", ""]}>
             {currencies.data.currencies.map((c) => (
@@ -331,6 +332,7 @@ export function CurrenciesPage() {
                 </td>
                 <td className="px-4 py-2.5">
                   <Button
+                    size="sm"
                     variant="secondary"
                     onClick={() => {
                       toggle.mutate(c);

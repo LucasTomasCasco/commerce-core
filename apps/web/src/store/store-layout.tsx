@@ -1,7 +1,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { NavLink, Outlet, useParams } from "react-router";
 import { api, unwrap } from "../api/client.js";
-import { Badge, PageHeader } from "../components/ui.js";
+import { Badge } from "../components/ui.js";
 import { StoreContext, type StoreContextValue } from "./store-context.js";
 
 const NAV = [
@@ -35,23 +35,36 @@ export function StoreLayout() {
 
   return (
     <StoreContext.Provider value={value}>
-      <PageHeader title={store.name}>
-        <Badge>{store.currencyCode}</Badge>
-        <Badge tone={store.status === "active" ? "good" : "bad"}>
-          {store.status === "active" ? "Activa" : "Suspendida"}
-        </Badge>
-      </PageHeader>
-      <nav className="mb-6 flex flex-wrap gap-1 border-b border-slate-200">
+      <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <span className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-[#ff7a1a] text-lg font-extrabold text-accent-fg shadow-[0_12px_32px_-14px_var(--accent)]">
+            {store.name.charAt(0).toUpperCase()}
+          </span>
+          <div>
+            <p className="num text-xs font-semibold uppercase tracking-[0.2em] text-fg-muted">
+              /{store.slug}
+            </p>
+            <h1 className="text-3xl font-extrabold tracking-tight">{store.name}</h1>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge>{store.currencyCode}</Badge>
+          <Badge tone={store.status === "active" ? "good" : "bad"}>
+            {store.status === "active" ? "Activa" : "Suspendida"}
+          </Badge>
+        </div>
+      </div>
+      <nav className="mb-10 flex flex-wrap gap-1.5 rounded-2xl border border-line bg-surface p-1.5 shadow-card">
         {visible.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.end}
             className={({ isActive }) =>
-              `-mb-px border-b-2 px-3 py-2 text-sm font-medium ${
+              `rounded-xl px-4 py-2 text-sm font-semibold transition ${
                 isActive
-                  ? "border-slate-900 text-slate-900"
-                  : "border-transparent text-slate-500 hover:text-slate-900"
+                  ? "bg-accent text-accent-fg shadow-sm"
+                  : "text-fg-muted hover:bg-surface-2 hover:text-fg"
               }`
             }
           >

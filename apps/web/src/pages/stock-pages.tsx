@@ -85,7 +85,7 @@ export function StockPage() {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="flex flex-col gap-4">
         {movements.data.items.length === 0 ? (
           <Empty>Todavía no hay movimientos de stock.</Empty>
@@ -93,15 +93,15 @@ export function StockPage() {
           <Table headers={["Fecha", "Producto", "Tipo", "Cantidad", "Motivo"]}>
             {movements.data.items.map((m) => (
               <tr key={m.id}>
-                <td className="px-4 py-2.5 text-xs text-slate-500">{formatDate(m.createdAt)}</td>
+                <td className="px-4 py-2.5 text-xs text-fg-muted">{formatDate(m.createdAt)}</td>
                 <td className="px-4 py-2.5 font-mono text-xs">{productName(m.productId)}</td>
                 <td className="px-4 py-2.5">{MOVEMENT_LABEL[m.type] ?? m.type}</td>
                 <td
-                  className={`px-4 py-2.5 font-medium ${m.quantityDelta < 0 ? "text-red-700" : "text-emerald-700"}`}
+                  className={`px-4 py-2.5 font-medium ${m.quantityDelta < 0 ? "text-bad" : "text-good"}`}
                 >
                   {m.quantityDelta > 0 ? `+${String(m.quantityDelta)}` : m.quantityDelta}
                 </td>
-                <td className="px-4 py-2.5 text-slate-600">{m.reason ?? "—"}</td>
+                <td className="px-4 py-2.5 text-fg-muted">{m.reason ?? "—"}</td>
               </tr>
             ))}
           </Table>

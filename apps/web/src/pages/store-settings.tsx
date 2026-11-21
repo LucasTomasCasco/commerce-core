@@ -62,12 +62,13 @@ export function PlatformStoreSettings({
           Guardar nombre
         </Button>
       </form>
-      <div className="flex flex-col gap-2 border-t border-slate-200 pt-4">
-        <p className="text-sm text-slate-600">
+      <div className="flex flex-col gap-2 border-t border-line pt-4">
+        <p className="text-sm text-fg-muted">
           Si el propietario no recibió la invitación o el enlace venció, reenvíala. El enlace
           anterior deja de funcionar.
         </p>
         <Button
+          size="sm"
           variant="secondary"
           onClick={() => {
             resend.mutate();
@@ -100,7 +101,7 @@ export function OwnerTransferForm({ storeId }: { storeId: string }) {
   return (
     <Card className="flex flex-col gap-4">
       <h2 className="font-semibold">Transferir propiedad</h2>
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-fg-muted">
         El nuevo propietario recibe una invitación. Hasta que la acepte, la tienda sigue con el
         propietario actual.
       </p>

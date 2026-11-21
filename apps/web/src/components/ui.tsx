@@ -10,35 +10,47 @@ import { Link } from "react-router";
 
 export function PageHeader({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-      <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-      <div className="flex flex-wrap gap-2">{children}</div>
+    <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+      <h1 className="text-3xl font-extrabold tracking-tight">{title}</h1>
+      <div className="flex flex-wrap items-center gap-2">{children}</div>
     </div>
   );
 }
 
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <section className={`rounded-xl border border-slate-200 bg-white p-5 shadow-sm ${className}`}>
+    <section className={`rounded-2xl border border-line bg-surface p-6 shadow-card ${className}`}>
       {children}
     </section>
   );
 }
 
+const BUTTON_STYLES = {
+  primary:
+    "bg-accent text-accent-fg shadow-[0_8px_24px_-10px_var(--accent)] hover:bg-accent-hover hover:-translate-y-px",
+  secondary: "border border-line bg-surface-2 text-fg hover:border-fg-muted",
+  danger: "bg-bad/15 text-bad border border-bad/30 hover:bg-bad/25",
+  ghost: "text-fg-muted hover:text-fg hover:bg-surface-2",
+} as const;
+
+const BUTTON_SIZES = {
+  md: "rounded-xl px-4 py-2.5 text-sm",
+  sm: "rounded-lg px-3 py-1.5 text-xs",
+} as const;
+
 export function Button({
   variant = "primary",
+  size = "md",
   className = "",
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "danger" }) {
-  const styles = {
-    primary: "bg-slate-900 text-white hover:bg-slate-700",
-    secondary: "border border-slate-300 bg-white text-slate-800 hover:bg-slate-100",
-    danger: "bg-red-600 text-white hover:bg-red-500",
-  }[variant];
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: keyof typeof BUTTON_STYLES;
+  size?: keyof typeof BUTTON_SIZES;
+}) {
   return (
     <button
       {...props}
-      className={`inline-flex items-center justify-center rounded-lg px-3.5 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${styles} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 font-semibold transition duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${BUTTON_SIZES[size]} ${BUTTON_STYLES[variant]} ${className}`}
     />
   );
 }
@@ -47,7 +59,7 @@ export function LinkButton({ to, children }: { to: string; children: ReactNode }
   return (
     <Link
       to={to}
-      className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-medium text-slate-800 hover:bg-slate-100"
+      className="inline-flex items-center gap-2 rounded-xl border border-line bg-surface-2 px-4 py-2.5 text-sm font-semibold text-fg transition hover:border-fg-muted"
     >
       {children}
     </Link>
@@ -56,67 +68,65 @@ export function LinkButton({ to, children }: { to: string; children: ReactNode }
 
 export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <label className="flex flex-col gap-1.5 text-sm font-medium text-slate-700">
+    <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-wider text-fg-muted">
       {label}
       {children}
     </label>
   );
 }
 
+const CONTROL =
+  "rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm normal-case tracking-normal text-fg placeholder:text-fg-muted/70 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20";
+
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <input
-      {...props}
-      className={`rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-900 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200 ${props.className ?? ""}`}
-    />
-  );
+  return <input {...props} className={`${CONTROL} ${props.className ?? ""}`} />;
 }
 
 export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
-  return (
-    <select
-      {...props}
-      className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-900 outline-none focus:border-slate-900"
-    />
-  );
+  return <select {...props} className={`${CONTROL} ${props.className ?? ""}`} />;
 }
+
+const ALERT_TONES = {
+  error: "border-bad/30 bg-bad/10 text-bad",
+  info: "border-info/30 bg-info/10 text-info",
+} as const;
 
 export function Alert({
   tone = "error",
   children,
 }: {
-  tone?: "error" | "info";
+  tone?: keyof typeof ALERT_TONES;
   children: ReactNode;
 }) {
-  const styles =
-    tone === "error"
-      ? "border-red-200 bg-red-50 text-red-800"
-      : "border-sky-200 bg-sky-50 text-sky-900";
   return (
     <div
       role={tone === "error" ? "alert" : "status"}
-      className={`rounded-lg border px-4 py-3 text-sm ${styles}`}
+      className={`rounded-xl border px-4 py-3 text-sm ${ALERT_TONES[tone]}`}
     >
       {children}
     </div>
   );
 }
 
+const BADGE_TONES = {
+  neutral: "bg-surface-2 text-fg-muted border-line",
+  good: "bg-good/15 text-good border-good/25",
+  warn: "bg-warn/15 text-warn border-warn/25",
+  bad: "bg-bad/15 text-bad border-bad/25",
+} as const;
+
 export function Badge({
   tone = "neutral",
   children,
 }: {
-  tone?: "neutral" | "good" | "warn" | "bad";
+  tone?: keyof typeof BADGE_TONES;
   children: ReactNode;
 }) {
-  const styles = {
-    neutral: "bg-slate-100 text-slate-700",
-    good: "bg-emerald-100 text-emerald-800",
-    warn: "bg-amber-100 text-amber-800",
-    bad: "bg-red-100 text-red-800",
-  }[tone];
   return (
-    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${styles}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${BADGE_TONES[tone]}`}
+    >
+      <span aria-hidden className="size-1.5 rounded-full bg-current" />
       {children}
     </span>
   );
@@ -124,33 +134,44 @@ export function Badge({
 
 export function Table({ headers, children }: { headers: string[]; children: ReactNode }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-      <table className="min-w-full divide-y divide-slate-200 text-sm">
-        <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
-          <tr>
+    <div className="overflow-x-auto rounded-2xl border border-line bg-surface shadow-card">
+      <table className="min-w-full text-sm">
+        <thead>
+          <tr className="border-b border-line text-left text-[11px] font-semibold uppercase tracking-widest text-fg-muted">
             {headers.map((h) => (
-              <th key={h} className="px-4 py-2.5 font-semibold">
+              <th key={h} className="px-5 py-3.5 font-semibold">
                 {h}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">{children}</tbody>
+        <tbody className="divide-y divide-line [&>tr]:transition-colors [&>tr:hover]:bg-surface-2/60">
+          {children}
+        </tbody>
       </table>
     </div>
   );
 }
 
 export function Empty({ children }: { children: ReactNode }) {
-  return <p className="px-4 py-8 text-center text-sm text-slate-500">{children}</p>;
+  return (
+    <div className="rounded-2xl border border-dashed border-line px-6 py-14 text-center text-sm text-fg-muted">
+      {children}
+    </div>
+  );
 }
 
 export function Spinner() {
-  return <p className="p-8 text-center text-sm text-slate-500">Cargando…</p>;
+  return (
+    <div className="flex items-center justify-center gap-3 p-12 text-sm text-fg-muted">
+      <span className="size-2 animate-pulse rounded-full bg-accent" />
+      Cargando…
+    </div>
+  );
 }
 
 export function formatDate(value: string | Date): string {
-  return new Intl.DateTimeFormat("es-AR", { dateStyle: "short", timeStyle: "short" }).format(
+  return new Intl.DateTimeFormat("es-AR", { dateStyle: "medium", timeStyle: "short" }).format(
     new Date(value),
   );
 }
@@ -202,7 +223,7 @@ export function Pager({
   const page = Math.floor(offset / limit) + 1;
   const pages = Math.ceil(total / limit);
   return (
-    <div className="flex items-center justify-end gap-3 text-sm text-slate-600">
+    <div className="flex items-center justify-end gap-3 text-sm text-fg-muted">
       <Button
         variant="secondary"
         disabled={offset === 0}
@@ -212,7 +233,7 @@ export function Pager({
       >
         Anterior
       </Button>
-      <span>
+      <span className="num">
         Página {page} de {pages}
       </span>
       <Button
@@ -225,5 +246,18 @@ export function Pager({
         Siguiente
       </Button>
     </div>
+  );
+}
+
+// Marca de la app: un bloque con degradado y las iniciales de Commerce Core.
+export function BrandMark({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+  const dims = { sm: "size-7 text-[11px]", md: "size-9 text-xs", lg: "size-12 text-sm" }[size];
+  return (
+    <span
+      aria-hidden
+      className={`inline-flex ${dims} items-center justify-center rounded-xl bg-gradient-to-br from-accent to-[#ff7a1a] font-extrabold tracking-tight text-accent-fg shadow-[0_10px_30px_-12px_var(--accent)]`}
+    >
+      CC
+    </span>
   );
 }

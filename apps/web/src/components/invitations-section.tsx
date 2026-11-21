@@ -53,13 +53,14 @@ export function InvitationsSection({
                 {expired ? (
                   <Badge tone="bad">Vencida</Badge>
                 ) : (
-                  <span className="text-xs text-slate-500">{formatDate(inv.expiresAt)}</span>
+                  <span className="text-xs text-fg-muted">{formatDate(inv.expiresAt)}</span>
                 )}
               </td>
               <td className="flex gap-2 px-4 py-2.5">
                 {canManage && (
                   <>
                     <Button
+                      size="sm"
                       variant="secondary"
                       onClick={() => {
                         resend.mutate(inv.id);
@@ -68,6 +69,7 @@ export function InvitationsSection({
                       Reenviar
                     </Button>
                     <Button
+                      size="sm"
                       variant="danger"
                       onClick={() => {
                         revoke.mutate(inv.id);

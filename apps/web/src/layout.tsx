@@ -1,8 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, Outlet, useNavigate } from "react-router";
 import { api, unwrap } from "./api/client.js";
-import { Boundary, Button } from "./components/ui.js";
 import { useMe } from "./auth/session.js";
+import { BrandMark, Boundary, Button } from "./components/ui.js";
+import { ThemeToggle } from "./components/theme-toggle.js";
 
 export function AppLayout() {
   const me = useMe();
@@ -24,33 +25,51 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-          <Link to="/" className="text-base font-semibold tracking-tight">
-            Commerce Core
-          </Link>
-          <div className="flex items-center gap-3 text-sm">
+      <header className="sticky top-0 z-30 border-b border-line bg-canvas/75 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3">
+          <div className="flex items-center gap-6">
+            <Link to="/" className="flex items-center gap-2.5">
+              <BrandMark />
+              <span className="hidden text-sm font-bold tracking-tight sm:block">
+                Commerce Core
+              </span>
+            </Link>
             {me.data?.isPlatformAdmin && (
-              <>
-                <Link to="/admin/tiendas" className="text-slate-600 hover:text-slate-900">
+              <nav className="flex items-center gap-1 text-sm font-medium">
+                <Link
+                  to="/admin/tiendas"
+                  className="rounded-lg px-3 py-1.5 text-fg-muted transition hover:bg-surface-2 hover:text-fg"
+                >
                   Tiendas
                 </Link>
-                <Link to="/admin/monedas" className="text-slate-600 hover:text-slate-900">
+                <Link
+                  to="/admin/monedas"
+                  className="rounded-lg px-3 py-1.5 text-fg-muted transition hover:bg-surface-2 hover:text-fg"
+                >
                   Monedas
                 </Link>
-              </>
+              </nav>
             )}
-            <span className="hidden text-slate-500 sm:inline">{me.data?.fullName}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="hidden max-w-[12rem] truncate pr-2 text-sm text-fg-muted md:inline">
+              {me.data?.fullName}
+            </span>
+            <ThemeToggle />
             <Button variant="secondary" onClick={() => void logout()}>
               Salir
             </Button>
-            <Button variant="secondary" onClick={() => void logoutEverywhere()}>
+            <Button
+              variant="ghost"
+              onClick={() => void logoutEverywhere()}
+              className="hidden lg:inline-flex"
+            >
               Salir de todos
             </Button>
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">
+      <main className="mx-auto max-w-6xl px-5 py-10">
         <Boundary>
           <Outlet />
         </Boundary>
@@ -61,9 +80,10 @@ export function AppLayout() {
 
 export function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-3">
-      <p className="text-lg font-medium">Página no encontrada</p>
-      <Link to="/" className="text-sm text-slate-600 underline">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+      <BrandMark size="lg" />
+      <p className="text-2xl font-bold">Página no encontrada</p>
+      <Link to="/" className="text-sm font-semibold text-accent hover:underline">
         Volver al inicio
       </Link>
     </div>

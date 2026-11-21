@@ -3,19 +3,51 @@ import { useState, type SyntheticEvent, type ReactNode } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { api, unwrap } from "../api/client.js";
 import { useMe } from "../auth/session.js";
-import { Alert, Boundary, Button, Card, Field, Input } from "../components/ui.js";
+import { Alert, BrandMark, Boundary, Button, Card, Field, Input } from "../components/ui.js";
+import { ThemeToggle } from "../components/theme-toggle.js";
 
-// Pantalla de acceso fuera del layout autenticado.
+// Pantalla de acceso: panel de marca a la izquierda (desktop) y formulario a la derecha.
 function AuthShell({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <p className="mb-6 text-center text-lg font-semibold tracking-tight">Commerce Core</p>
-        <Card>
-          <h1 className="mb-4 text-xl font-semibold">{title}</h1>
-          {children}
-        </Card>
-      </div>
+    <div className="grid min-h-screen lg:grid-cols-[1.1fr_1fr]">
+      <aside className="relative hidden overflow-hidden border-r border-line lg:flex lg:flex-col lg:justify-between lg:p-14">
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-[radial-gradient(60%_50%_at_30%_20%,var(--glow-a),transparent),radial-gradient(50%_40%_at_80%_90%,var(--glow-b),transparent)]"
+        />
+        <div className="relative flex items-center gap-3">
+          <BrandMark size="lg" />
+          <span className="text-lg font-bold tracking-tight">Commerce Core</span>
+        </div>
+        <div className="relative max-w-md">
+          <p className="text-5xl font-extrabold leading-[1.05] tracking-tight">
+            Tu comercio,{" "}
+            <span className="bg-gradient-to-r from-accent to-[#ff7a1a] bg-clip-text text-transparent">
+              en un solo panel.
+            </span>
+          </p>
+          <p className="mt-6 text-base leading-relaxed text-fg-muted">
+            Catálogo, stock con ledger, pedidos y equipo con permisos a medida, para varias tiendas
+            en una misma plataforma.
+          </p>
+        </div>
+        <p className="relative text-xs text-fg-muted">
+          Proyecto de portfolio · API documentada en /docs
+        </p>
+      </aside>
+      <main className="relative flex items-center justify-center px-5 py-12">
+        <div className="absolute right-5 top-5">
+          <ThemeToggle />
+        </div>
+        <div className="w-full max-w-sm">
+          <div className="mb-8 flex items-center gap-3 lg:hidden">
+            <BrandMark />
+            <span className="font-bold tracking-tight">Commerce Core</span>
+          </div>
+          <h1 className="mb-6 text-3xl font-extrabold tracking-tight">{title}</h1>
+          <Card>{children}</Card>
+        </div>
+      </main>
     </div>
   );
 }
