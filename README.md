@@ -92,7 +92,7 @@ El administrador general se crea con `PLATFORM_ADMIN_EMAIL` y `PLATFORM_ADMIN_PA
 | Taller Lino (USD)           | `mateo@taller-lino.example`  | `demo-cliente-123` |
 | Panadería Dulce Trigo (ARS) | `renata@dulce-trigo.example` | `demo-cliente-123` |
 
-El staff de cada tienda usa la misma contraseña que su propietario en el caso de `demo-cliente-123`. Todas son **solo para desarrollo**: están en `apps/api/src/db/seed-demo.ts` y son públicas.
+Todo el staff de las tres tiendas usa `demo-cliente-123`. Todas las contraseñas son **solo para desarrollo**: están en `apps/api/src/db/seed-demo.ts` y son públicas.
 
 ## Scripts
 
