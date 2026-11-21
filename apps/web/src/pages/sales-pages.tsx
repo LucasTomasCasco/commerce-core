@@ -32,9 +32,9 @@ const STATUS_LABEL: Record<string, string> = {
   cancelled: "Cancelado",
 };
 
-const STATUS_TONE: Record<string, "neutral" | "good" | "warn" | "bad"> = {
+const STATUS_TONE: Record<string, "neutral" | "good" | "warn" | "bad" | "info"> = {
   pending: "warn",
-  confirmed: "neutral",
+  confirmed: "info",
   fulfilled: "good",
   cancelled: "bad",
 };

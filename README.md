@@ -84,9 +84,15 @@ El administrador general se crea con `PLATFORM_ADMIN_EMAIL` y `PLATFORM_ADMIN_PA
 
 ## Datos de demo
 
-`db:seed` crea monedas, el administrador general y la tienda **Casa Roble** (ficticia) con su propietaria `lucia@casa-roble.example`.
+`pnpm --filter @commerce-core/api db:seed:demo` carga tres clientes completos: equipo con roles propios, catálogo con categorías archivadas y productos agotados, pedidos en todos los estados, movimientos de stock que cierran con el saldo, invitaciones pendientes y vencidas, y auditoría.
 
-**Solo para desarrollo:** la contraseña demo de esa cuenta es pública en `apps/api/src/db/seed.ts`. No usar en un entorno real.
+| Tienda                      | Propietario                  | Contraseña         |
+| --------------------------- | ---------------------------- | ------------------ |
+| Casa Roble (ARS)            | `lucia@casa-roble.example`   | `demo-owner-123`   |
+| Taller Lino (USD)           | `mateo@taller-lino.example`  | `demo-cliente-123` |
+| Panadería Dulce Trigo (ARS) | `renata@dulce-trigo.example` | `demo-cliente-123` |
+
+El staff de cada tienda usa la misma contraseña que su propietario en el caso de `demo-cliente-123`. Todas son **solo para desarrollo**: están en `apps/api/src/db/seed-demo.ts` y son públicas.
 
 ## Scripts
 

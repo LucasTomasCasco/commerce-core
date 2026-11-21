@@ -11,7 +11,8 @@
     "test": "vitest run",
     "db:migrate": "tsx --env-file-if-exists=../../.env src/db/migrate-cli.ts",
     "db:seed": "tsx --env-file-if-exists=../../.env src/db/seed-cli.ts",
-    "openapi:export": "tsx --env-file-if-exists=../../.env src/openapi-export.ts"
+    "openapi:export": "tsx --env-file-if-exists=../../.env src/openapi-export.ts",
+    "db:seed:demo": "tsx --env-file-if-exists=../../.env src/db/seed-demo-cli.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.5",

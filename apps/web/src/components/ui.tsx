@@ -113,6 +113,7 @@ const BADGE_TONES = {
   good: "bg-good/15 text-good border-good/25",
   warn: "bg-warn/15 text-warn border-warn/25",
   bad: "bg-bad/15 text-bad border-bad/25",
+  info: "bg-info/15 text-info border-info/25",
 } as const;
 
 export function Badge({
