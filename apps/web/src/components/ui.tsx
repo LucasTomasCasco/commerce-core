@@ -10,8 +10,8 @@ import { Link } from "react-router";
 
 export function PageHeader({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-      <h1 className="text-3xl font-extrabold tracking-tight">{title}</h1>
+    <div className="mb-6 flex flex-wrap items-end justify-between gap-4 sm:mb-8">
+      <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{title}</h1>
       <div className="flex flex-wrap items-center gap-2">{children}</div>
     </div>
   );
@@ -66,9 +66,19 @@ export function LinkButton({ to, children }: { to: string; children: ReactNode }
   );
 }
 
-export function Field({ label, children }: { label: string; children: ReactNode }) {
+export function Field({
+  label,
+  className = "",
+  children,
+}: {
+  label: string;
+  className?: string;
+  children: ReactNode;
+}) {
   return (
-    <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-wider text-fg-muted">
+    <label
+      className={`flex flex-col gap-2 text-xs font-semibold uppercase tracking-wider text-fg-muted ${className}`}
+    >
       {label}
       {children}
     </label>

@@ -103,11 +103,12 @@ export function ProductsPage() {
     categories.data.categories.find((c) => c.id === id)?.name ?? "—";
 
   return (
-    <div className="grid gap-6 2xl:grid-cols-[minmax(0,1fr)_340px]">
+    <div className="grid grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-end gap-3">
-          <Field label="Buscar">
+          <Field label="Buscar" className="w-full min-w-0 sm:w-64">
             <Input
+              className="w-full min-w-0"
               value={q}
               onChange={(e) => {
                 setQ(e.target.value);
@@ -116,8 +117,9 @@ export function ProductsPage() {
               placeholder="Nombre o SKU"
             />
           </Field>
-          <Field label="Categoría">
+          <Field label="Categoría" className="w-full min-w-0 sm:w-64">
             <Select
+              className="w-full min-w-0"
               value={categoryId}
               onChange={(e) => {
                 setCategoryId(e.target.value);

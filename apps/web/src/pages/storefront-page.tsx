@@ -10,7 +10,7 @@ import { initials, productArt } from "../lib/product-art.js";
 // Vista pública de la tienda: sin sesión, solo productos activos y disponibilidad (sin cantidades).
 export function StorefrontPage() {
   return (
-    <div className="mx-auto max-w-6xl px-5 py-10">
+    <div className="mx-auto max-w-6xl px-5 py-6 sm:py-10">
       <div className="mb-10 flex justify-end">
         <ThemeToggle />
       </div>
@@ -46,11 +46,11 @@ function Catalog() {
 
   return (
     <>
-      <header className="mb-12 max-w-2xl">
+      <header className="mb-8 max-w-2xl sm:mb-12">
         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent">
           Catálogo
         </p>
-        <h1 className="text-5xl font-extrabold leading-[1.05] tracking-tight">
+        <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">
           Lo que tenemos{" "}
           <span className="bg-gradient-to-r from-accent to-[#ff7a1a] bg-clip-text text-transparent">
             hoy
@@ -60,7 +60,8 @@ function Catalog() {
       </header>
 
       <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-wrap gap-2">
+        {/* En teléfono las categorías son una franja deslizable; en md+ hacen wrap. */}
+        <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [&>*]:shrink-0 md:mx-0 md:flex-wrap md:overflow-visible md:px-0">
           <Chip
             active={categoryId === ""}
             onClick={() => {
@@ -115,7 +116,7 @@ function Catalog() {
               </div>
               <div className="flex flex-1 flex-col gap-2 p-4">
                 <p className="line-clamp-2 font-semibold leading-snug">{p.name}</p>
-                <div className="mt-auto flex items-end justify-between gap-2 pt-2">
+                <div className="mt-auto flex flex-wrap items-end justify-between gap-x-2 gap-y-1 pt-2">
                   <p className="num text-lg font-bold">
                     {formatMoney(p.priceMinor, p.currencyCode)}
                   </p>

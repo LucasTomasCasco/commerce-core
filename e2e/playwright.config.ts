@@ -24,23 +24,26 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
-  webServer: externalBaseUrl
-    ? undefined
-    : [
-        {
-          command: "pnpm --filter @commerce-core/api dev",
-          // Muchos logins desde la misma IP: el límite de producción no sirve para una suite E2E.
-          env: { PORT: API_PORT, AUTH_RATE_LIMIT_MAX: "500" },
-          url: `http://localhost:${API_PORT}/api/v1/health`,
-          reuseExistingServer: true,
-          timeout: 60_000,
-        },
-        {
-          command: "pnpm --filter @commerce-core/web dev",
-          env: { API_URL: `http://localhost:${API_PORT}` },
-          url: "http://localhost:5173",
-          reuseExistingServer: true,
-          timeout: 60_000,
-        },
-      ],
+  // Con exactOptionalPropertyTypes no se puede asignar undefined: la clave solo existe sin URL externa.
+  ...(externalBaseUrl
+    ? {}
+    : {
+        webServer: [
+          {
+            command: "pnpm --filter @commerce-core/api dev",
+            // Muchos logins desde la misma IP: el límite de producción no sirve para una suite E2E.
+            env: { PORT: API_PORT, AUTH_RATE_LIMIT_MAX: "500" },
+            url: `http://localhost:${API_PORT}/api/v1/health`,
+            reuseExistingServer: true,
+            timeout: 60_000,
+          },
+          {
+            command: "pnpm --filter @commerce-core/web dev",
+            env: { API_URL: `http://localhost:${API_PORT}` },
+            url: "http://localhost:5173",
+            reuseExistingServer: true,
+            timeout: 60_000,
+          },
+        ],
+      }),
 });

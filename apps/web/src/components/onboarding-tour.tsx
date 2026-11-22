@@ -113,11 +113,11 @@ export function OnboardingTour() {
         </h2>
         <p className="mt-3 leading-relaxed text-fg-muted">{current?.body}</p>
 
-        <div className="mt-8 flex items-center justify-between gap-3">
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
           <Button variant="ghost" onClick={close}>
             Omitir
           </Button>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {step > 0 && (
               <Button
                 variant="secondary"

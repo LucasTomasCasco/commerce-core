@@ -27,7 +27,7 @@ export function AppLayout() {
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-30 border-b border-line bg-canvas/75 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-3 px-5 py-3">
           <div className="flex items-center gap-6">
             <Link to="/" className="flex items-center gap-2.5">
               <BrandMark />
@@ -52,33 +52,28 @@ export function AppLayout() {
               </nav>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-2">
             <span className="hidden max-w-[12rem] truncate pr-2 text-sm text-fg-muted md:inline">
               {me.data?.fullName}
             </span>
-            <Button
-              variant="ghost"
-              onClick={() => window.dispatchEvent(new Event("cc-open-tour"))}
-              className="hidden md:inline-flex"
-            >
+            <Button variant="ghost" onClick={() => window.dispatchEvent(new Event("cc-open-tour"))}>
               Tutorial
             </Button>
             <ThemeToggle />
             <Button variant="secondary" onClick={() => void logout()}>
               Salir
             </Button>
-            <Button
-              variant="ghost"
-              onClick={() => void logoutEverywhere()}
-              className="hidden lg:inline-flex"
-            >
-              Salir de todos
-            </Button>
+            {/* Envuelto: la clase de visibilidad en el Button choca con su inline-flex base. */}
+            <div className="hidden lg:block">
+              <Button variant="ghost" onClick={() => void logoutEverywhere()}>
+                Salir de todos
+              </Button>
+            </div>
           </div>
         </div>
       </header>
       <OnboardingTour />
-      <main className="mx-auto max-w-6xl px-5 py-10">
+      <main className="mx-auto max-w-6xl px-5 py-6 sm:py-10">
         <Boundary>
           <Outlet />
         </Boundary>

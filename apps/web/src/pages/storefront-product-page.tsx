@@ -59,7 +59,7 @@ function ProductDetail() {
         {p.description && (
           <p className="text-base leading-relaxed text-fg-muted">{p.description}</p>
         )}
-        <div className="flex items-center justify-between rounded-2xl border border-line bg-surface p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-5">
           <p className="num text-3xl font-extrabold">{formatMoney(p.priceMinor, p.currencyCode)}</p>
           <Badge tone={p.inStock ? "good" : "bad"}>{p.inStock ? "Disponible" : "Agotado"}</Badge>
         </div>

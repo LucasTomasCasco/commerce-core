@@ -35,16 +35,18 @@ export function StoreLayout() {
 
   return (
     <StoreContext.Provider value={value}>
-      <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <span className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-[#ff7a1a] text-lg font-extrabold text-accent-fg shadow-[0_12px_32px_-14px_var(--accent)]">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-6 sm:mb-10">
+        <div className="flex min-w-0 items-center gap-4">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-[#ff7a1a] text-lg font-extrabold text-accent-fg shadow-[0_12px_32px_-14px_var(--accent)] sm:size-14">
             {store.name.charAt(0).toUpperCase()}
           </span>
-          <div>
-            <p className="num text-xs font-semibold uppercase tracking-[0.2em] text-fg-muted">
+          <div className="min-w-0">
+            <p className="num truncate text-xs font-semibold uppercase tracking-[0.2em] text-fg-muted">
               /{store.slug}
             </p>
-            <h1 className="text-3xl font-extrabold tracking-tight">{store.name}</h1>
+            <h1 className="truncate text-2xl font-extrabold tracking-tight sm:text-3xl">
+              {store.name}
+            </h1>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -54,14 +56,14 @@ export function StoreLayout() {
           </Badge>
         </div>
       </div>
-      <nav className="mb-10 flex flex-wrap gap-1.5 rounded-2xl border border-line bg-surface p-1.5 shadow-card">
+      <nav className="mb-6 flex gap-1.5 overflow-x-auto rounded-2xl border border-line bg-surface p-1.5 shadow-card sm:mb-10">
         {visible.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.end}
             className={({ isActive }) =>
-              `rounded-xl px-4 py-2 text-sm font-semibold transition ${
+              `shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition ${
                 isActive
                   ? "bg-accent text-accent-fg shadow-sm"
                   : "text-fg-muted hover:bg-surface-2 hover:text-fg"
