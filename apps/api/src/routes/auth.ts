@@ -14,6 +14,7 @@ const userSchema = z.object({
   email: z.email(),
   fullName: z.string(),
   isPlatformAdmin: z.boolean(),
+  onboardingCompleted: z.boolean(),
 });
 
 export function authRoutes(env: Env): FastifyPluginCallbackZod {
@@ -67,6 +68,22 @@ export function authRoutes(env: Env): FastifyPluginCallbackZod {
       async (request, reply) => {
         await app.services.auth.logoutAll(currentAuth(request).user.id);
         reply.clearCookie(SESSION_COOKIE, { path: "/" });
+        return reply.code(204).send(null);
+      },
+    );
+
+    app.post(
+      "/onboarding/complete",
+      {
+        preValidation: requireSession(app.services.auth),
+        schema: {
+          tags: ["auth"],
+          summary: "Marcar el tutorial de primer ingreso como visto",
+          response: { 204: z.null() },
+        },
+      },
+      async (request, reply) => {
+        await app.services.auth.completeOnboarding(currentAuth(request).user.id);
         return reply.code(204).send(null);
       },
     );

@@ -35,6 +35,8 @@ export const users = pgTable(
     fullName: text().notNull(),
     platformRole: platformRoleEnum(),
     isActive: boolean().notNull().default(true),
+    // Tutorial de primer ingreso: se marca al terminarlo o saltearlo, y vale en cualquier dispositivo.
+    onboardingCompletedAt: timestamp({ withTimezone: true }),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("users_email_key").on(sql`lower(${t.email})`)],

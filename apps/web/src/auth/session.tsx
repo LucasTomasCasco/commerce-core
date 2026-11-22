@@ -4,7 +4,13 @@ import { Navigate, useLocation } from "react-router";
 import { api, ApiError, unwrap } from "../api/client.js";
 import { Spinner } from "../components/ui.js";
 
-export type Me = { id: string; email: string; fullName: string; isPlatformAdmin: boolean };
+export type Me = {
+  id: string;
+  email: string;
+  fullName: string;
+  isPlatformAdmin: boolean;
+  onboardingCompleted: boolean;
+};
 
 // Devuelve el usuario de la sesión o null si no hay sesión válida.
 export function useMe() {

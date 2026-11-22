@@ -1,5 +1,6 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { waitForTokenSentTo } from "./mailpit.js";
+import { dismissTour } from "./support.js";
 
 // Flujo completo: el administrador general crea la tienda, el propietario acepta por email, configura
 // un rol y un staff, y el staff opera dentro de los permisos que le dieron. Luego se cargan productos,
@@ -130,6 +131,7 @@ async function login(page: Page, email: string, password: string) {
   await page.getByLabel("Contraseña").fill(password);
   await page.getByRole("button", { name: "Ingresar" }).click();
   await expect(page.getByRole("button", { name: "Salir", exact: true })).toBeVisible();
+  await dismissTour(page);
 }
 
 async function acceptInvitation(page: Page, email: string, fullName: string) {
@@ -139,6 +141,7 @@ async function acceptInvitation(page: Page, email: string, fullName: string) {
   await page.getByLabel(/Contraseña/).fill(PASSWORD);
   await page.getByRole("button", { name: "Crear cuenta y aceptar" }).click();
   await expect(page).toHaveURL(/\/tiendas\/[0-9a-f-]{36}/);
+  await dismissTour(page);
 }
 
 // Crea un pedido desde el formulario y devuelve el contenedor donde se muestra el resultado.

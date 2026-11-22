@@ -15,12 +15,19 @@ export function storeIdFrom(url: string): string {
   return id;
 }
 
+// Un usuario nuevo ve el tutorial de primer ingreso: en los flujos de prueba lo descartamos.
+export async function dismissTour(page: Page) {
+  const skip = page.getByRole("button", { name: "Omitir" });
+  if (await skip.isVisible({ timeout: 1500 }).catch(() => false)) await skip.click();
+}
+
 export async function login(page: Page, email: string, password: string) {
   await page.goto("/login");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Contraseña").fill(password);
   await page.getByRole("button", { name: "Ingresar" }).click();
   await expect(page.getByRole("button", { name: "Salir", exact: true })).toBeVisible();
+  await dismissTour(page);
 }
 
 // Acepta la invitación más reciente enviada al email, desde la pantalla de la web.
@@ -31,6 +38,7 @@ export async function acceptInvitation(page: Page, email: string, fullName: stri
   await page.getByLabel(/Contraseña/).fill(PASSWORD);
   await page.getByRole("button", { name: "Crear cuenta y aceptar" }).click();
   await expect(page).toHaveURL(/\/tiendas\/[0-9a-f-]{36}/);
+  await dismissTour(page);
 }
 
 // Inicia sesión por API (más rápido que la UI para preparar datos). Devuelve el request con la cookie.

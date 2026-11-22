@@ -43,9 +43,11 @@ services:
 
   api-seed:
     <<: *api-image
-    command: ["node", "dist/db/seed-cli.js"]
+    # Carga inicial y datos de demo. Usa el superusuario de desarrollo: la carga inserta filas con RLS
+    # y no pasa por el contexto de tienda. En producción no se corre este servicio.
+    command: ["sh", "-c", "node dist/db/seed-cli.js && node dist/db/seed-demo-cli.js"]
     environment:
-      DATABASE_URL: postgres://commerce_api:commerce_api@postgres:5432/commerce_core
+      DATABASE_URL: postgres://commerce:commerce@postgres:5432/commerce_core
       PLATFORM_ADMIN_EMAIL: ${PLATFORM_ADMIN_EMAIL:-admin@commerce-core.local}
       PLATFORM_ADMIN_PASSWORD: ${PLATFORM_ADMIN_PASSWORD:?Definir PLATFORM_ADMIN_PASSWORD en .env}
     depends_on:

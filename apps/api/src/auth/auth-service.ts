@@ -11,6 +11,7 @@ export type AuthUser = {
   email: string;
   fullName: string;
   isPlatformAdmin: boolean;
+  onboardingCompleted: boolean;
 };
 
 export type AuthServiceDeps = {
@@ -202,7 +203,15 @@ export function createAuthService({
     });
   }
 
+  async function completeOnboarding(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ onboardingCompletedAt: new Date() })
+      .where(and(eq(users.id, userId), isNull(users.onboardingCompletedAt)));
+  }
+
   return {
+    completeOnboarding,
     login,
     logout,
     logoutAll,
@@ -220,5 +229,6 @@ export function toAuthUser(user: typeof users.$inferSelect): AuthUser {
     email: user.email,
     fullName: user.fullName,
     isPlatformAdmin: user.platformRole === "platform_admin",
+    onboardingCompleted: user.onboardingCompletedAt !== null,
   };
 }

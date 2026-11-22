@@ -129,13 +129,17 @@
                         },
                         "isPlatformAdmin": {
                           "type": "boolean"
+                        },
+                        "onboardingCompleted": {
+                          "type": "boolean"
                         }
                       },
                       "required": [
                         "id",
                         "email",
                         "fullName",
-                        "isPlatformAdmin"
+                        "isPlatformAdmin",
+                        "onboardingCompleted"
                       ],
                       "additionalProperties": false
                     }
@@ -199,6 +203,30 @@
         }
       }
     },
+    "/api/v1/auth/onboarding/complete": {
+      "post": {
+        "summary": "Marcar el tutorial de primer ingreso como visto",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "204": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "nullable": true,
+                  "enum": [
+                    null
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/me": {
       "get": {
         "summary": "Usuario de la sesión actual",
@@ -231,13 +259,17 @@
                         },
                         "isPlatformAdmin": {
                           "type": "boolean"
+                        },
+                        "onboardingCompleted": {
+                          "type": "boolean"
                         }
                       },
                       "required": [
                         "id",
                         "email",
                         "fullName",
-                        "isPlatformAdmin"
+                        "isPlatformAdmin",
+                        "onboardingCompleted"
                       ],
                       "additionalProperties": false
                     }

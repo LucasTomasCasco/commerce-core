@@ -4,6 +4,7 @@ import { api, unwrap } from "./api/client.js";
 import { useMe } from "./auth/session.js";
 import { BrandMark, Boundary, Button } from "./components/ui.js";
 import { ThemeToggle } from "./components/theme-toggle.js";
+import { OnboardingTour } from "./components/onboarding-tour.js";
 
 export function AppLayout() {
   const me = useMe();
@@ -55,6 +56,13 @@ export function AppLayout() {
             <span className="hidden max-w-[12rem] truncate pr-2 text-sm text-fg-muted md:inline">
               {me.data?.fullName}
             </span>
+            <Button
+              variant="ghost"
+              onClick={() => window.dispatchEvent(new Event("cc-open-tour"))}
+              className="hidden md:inline-flex"
+            >
+              Tutorial
+            </Button>
             <ThemeToggle />
             <Button variant="secondary" onClick={() => void logout()}>
               Salir
@@ -69,6 +77,7 @@ export function AppLayout() {
           </div>
         </div>
       </header>
+      <OnboardingTour />
       <main className="mx-auto max-w-6xl px-5 py-10">
         <Boundary>
           <Outlet />
