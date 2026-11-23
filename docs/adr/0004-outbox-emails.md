@@ -16,4 +16,4 @@ Crear una tienda o invitar staff confirma una transacción y después envía un 
 
 - Un SMTP caído no rompe altas ni invitaciones; los emails salen cuando el SMTP vuelve.
 - Entrega "al menos una vez": un proceso que cae después de enviar y antes de marcar `sent` puede reenviar. Para invitaciones un duplicado es inocuo porque cada token es de un solo uso y el reenvío revoca el anterior.
-- El worker corre dentro del proceso de la API. Con varias réplicas, `processOutbox` usa `SELECT` sin bloqueo: en ese caso conviene `FOR UPDATE SKIP LOCKED` (anotado como deuda).
+- El worker corre dentro del proceso de la API. Con varias réplicas, `processOutbox` toma las filas con `FOR UPDATE SKIP LOCKED` dentro de una transacción: cada email lo procesa un solo proceso. La transacción sostiene el lock mientras envía el lote (20 emails por defecto), así que el tiempo que dura es acotado.

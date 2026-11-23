@@ -39,6 +39,26 @@ describe("outbox de emails", () => {
     expect(ctx.sent).toHaveLength(1);
   });
 
+  it("dos procesos a la vez no envían el mismo email dos veces", async () => {
+    for (let i = 0; i < 5; i++)
+      await enqueueEmail(ctx.db, { ...MESSAGE, subject: `Asunto ${String(i)}` });
+    const sentBySlowMailer: string[] = [];
+    const slowMailer = {
+      send: async (message: { subject: string }) => {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        sentBySlowMailer.push(message.subject);
+      },
+    };
+
+    const [a, b] = await Promise.all([
+      processOutbox(ctx.db, slowMailer),
+      processOutbox(ctx.db, slowMailer),
+    ]);
+
+    expect(a + b).toBe(5);
+    expect(new Set(sentBySlowMailer).size).toBe(5);
+  });
+
   it("si el SMTP falla, reagenda con backoff y reintenta después", async () => {
     await enqueueEmail(ctx.db, MESSAGE);
     const failing = {
