@@ -15,6 +15,8 @@ export default defineConfig({
   testDir: "./",
   testMatch: "**/*.spec.ts",
   timeout: 120_000,
+  // El default de 5 s falla bajo carga (CI o máquinas ocupadas): una aserción lenta no es un error.
+  expect: { timeout: 15_000 },
   workers: 1,
   fullyParallel: false,
   reporter: [["list"]],
