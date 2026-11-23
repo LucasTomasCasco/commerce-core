@@ -1,6 +1,9 @@
 import {
+  Children,
   Component,
   Suspense,
+  cloneElement,
+  isValidElement,
   type ButtonHTMLAttributes,
   type InputHTMLAttributes,
   type ReactNode,
@@ -143,11 +146,25 @@ export function Badge({
   );
 }
 
+// En teléfono cada fila se muestra como tarjeta: cada celda toma el encabezado de su columna como etiqueta.
+function withCellLabels(rows: ReactNode, headers: string[]): ReactNode {
+  return Children.map(rows, (row) => {
+    if (!isValidElement<{ children?: ReactNode }>(row)) return row;
+    return cloneElement(row, {
+      children: Children.map(row.props.children, (cell, i) =>
+        isValidElement<{ "data-label"?: string }>(cell)
+          ? cloneElement(cell, { "data-label": headers[i] ?? "" })
+          : cell,
+      ),
+    });
+  });
+}
+
 export function Table({ headers, children }: { headers: string[]; children: ReactNode }) {
   return (
     <div className="overflow-x-auto rounded-2xl border border-line bg-surface shadow-card">
-      <table className="min-w-full text-sm">
-        <thead>
+      <table className="min-w-full text-sm max-md:block">
+        <thead className="max-md:hidden">
           <tr className="border-b border-line text-left text-[11px] font-semibold uppercase tracking-widest text-fg-muted">
             {headers.map((h) => (
               <th key={h} className="px-5 py-3.5 font-semibold">
@@ -156,8 +173,8 @@ export function Table({ headers, children }: { headers: string[]; children: Reac
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-line [&>tr]:transition-colors [&>tr:hover]:bg-surface-2/60">
-          {children}
+        <tbody className="divide-y divide-line max-md:block [&>tr]:transition-colors [&>tr:hover]:bg-surface-2/60 [&>tr]:max-md:block [&>tr]:max-md:space-y-2 [&>tr]:max-md:px-4 [&>tr]:max-md:py-4 [&>tr>td]:max-md:flex [&>tr>td]:max-md:items-center [&>tr>td]:max-md:justify-between [&>tr>td]:max-md:gap-4 [&>tr>td]:max-md:px-0 [&>tr>td]:max-md:py-0.5 [&>tr>td]:max-md:before:text-[11px] [&>tr>td]:max-md:before:font-semibold [&>tr>td]:max-md:before:uppercase [&>tr>td]:max-md:before:tracking-widest [&>tr>td]:max-md:before:text-fg-muted [&>tr>td]:max-md:before:content-[attr(data-label)]">
+          {withCellLabels(children, headers)}
         </tbody>
       </table>
     </div>
