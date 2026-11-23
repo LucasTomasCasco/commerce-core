@@ -32,14 +32,15 @@ test("el administrador reenvía la invitación: el enlace anterior deja de funci
   const owner = `reenvio-${RUN}@e2e.example`;
   const storeId = await createStoreAsAdmin(page, slug, owner);
   // El worker envía el email en segundos: esperamos a que llegue antes de leer el token.
-  await expect.poll(async () => (await tokensSentTo(owner)).length).toBe(1);
+  // El worker procesa el outbox cada 5 s y Mailpit recibe después: el margen por defecto de 5 s no alcanza en CI.
+  await expect.poll(async () => (await tokensSentTo(owner)).length, { timeout: 20_000 }).toBe(1);
   const [firstToken] = await tokensSentTo(owner);
 
   await page.goto(`/admin/tiendas/${storeId}`);
   await page.getByRole("button", { name: "Reenviar invitación al propietario" }).click();
   await expect(page.getByText("Invitación reenviada.")).toBeVisible();
 
-  await expect.poll(async () => (await tokensSentTo(owner)).length).toBe(2);
+  await expect.poll(async () => (await tokensSentTo(owner)).length, { timeout: 20_000 }).toBe(2);
   const [newToken] = await tokensSentTo(owner);
   expect(newToken).not.toBe(firstToken);
 
