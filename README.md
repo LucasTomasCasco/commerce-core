@@ -2,7 +2,7 @@
 
 Backend y panel multi-tienda para comercios pequeños: tiendas aisladas, catálogo, stock con ledger, pedidos y equipo con permisos a medida.
 
-Incluye API REST documentada (OpenAPI), panel de administración, storefront público y un E2E en navegador que recorre el flujo completo.
+Incluye API REST documentada (OpenAPI), panel de administración, storefront público y un E2E en navegador que recorre el flujo completo. El panel funciona en teléfono: en pantallas chicas las tablas se muestran como tarjetas y la navegación de cada tienda se desliza; un test E2E falla si alguna pantalla desborda en 375px.
 
 ## Stack
 
