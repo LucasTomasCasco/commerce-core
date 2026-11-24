@@ -118,4 +118,4 @@ Para el E2E: `pnpm e2e` levanta la API y la web si no están corriendo. Contra u
 
 ## Fuera de v1
 
-Variantes de producto (talle, color), pagos y facturación, SSR para SEO del storefront, dominios propios por tienda, planes y cobro, límites de empleados por plan, precios multi-moneda por producto, 2FA, proveedor de email real y transferencia de propietario desde la UI.
+Variantes de producto (talle, color), pagos y facturación, SSR para SEO del storefront, dominios propios por tienda, planes y cobro, límites de empleados por plan, precios multi-moneda por producto, 2FA y proveedor de email real.
