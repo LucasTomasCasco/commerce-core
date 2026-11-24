@@ -50,9 +50,11 @@ describe("outbox de emails", () => {
       },
     };
 
+    // Un "ahora" futuro: el reloj de la base y el del proceso pueden diferir por milisegundos en CI.
+    const now = new Date(Date.now() + 60_000);
     const [a, b] = await Promise.all([
-      processOutbox(ctx.db, slowMailer),
-      processOutbox(ctx.db, slowMailer),
+      processOutbox(ctx.db, slowMailer, { now }),
+      processOutbox(ctx.db, slowMailer, { now }),
     ]);
 
     expect(a + b).toBe(5);
